@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA 生日星空图 | APOD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        body {
+            background-color: #000;
+            color: #fff;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: #f0f0f0;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #ccc;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto 40px;
+            padding: 20px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background-color: #111;
+        }
+        .form-item {margin: 15px 0;}
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #ddd;
+        }
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            background: #222;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            background-color: #005ea5;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {background-color: #0078d4;}
+        button:disabled {
+            background-color: #333;
+            cursor: not-allowed;
+        }
+        .tip {
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 20px 0;
+            color: #ffcc00;
+        }
+        .error {
+            color: #ff4444;
+        }
+        .result {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: none;
+        }
+        .result-img {
+            width: 100%;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            box-shadow: 0 0 20px #222;
+        }
+        .result-title {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+        .result-date {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+        .result-desc {
+            font-size: 1rem;
+            color: #e0e0e0;
+            text-align: justify;
+            padding: 0 10px;
+        }
+        .intro-box {
+            max-width: 1000px;
+            margin: 40px auto 0;
+            padding: 25px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #0a0a0a;
+        }
+        .intro-box h3 {
+            color: #ffd700;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .intro-box p {
+            color: #cccccc;
+            font-size: 1rem;
+            line-height: 1.8;
+            text-indent: 2em;
+            margin: 10px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>NASA 每日天文图 - 你的生日星空</h1>
+        <p>选择你的出生日期，查看当天 NASA 拍摄的绝美宇宙星空图</p>
+    </div>
+    <div class="search-box">
+        <div class="form-item">
+            <label for="birthDate">选择出生日期</label>
+            <input type="date" id="birthDate" max="">
+        </div>
+        <button id="searchBtn">查询星空图</button>
+    </div>
+    <div class="tip" id="tip"></div>
+    <div class="result" id="resultBox">
+        <h2 class="result-title" id="imgTitle"></h2>
+        <div class="result-date" id="imgDate"></div>
+        <img class="result-img" id="starImg" alt="NASA 星空图">
+        <p class="result-desc" id="imgDesc"></p>
+    </div>
+    <div class="intro-box">
+        <h3>项目介绍</h3>
+        <p>NASA 每日天文图（APOD）是美国国家航空航天局推出的经典天文科普项目，自1995年6月16日起，每天都会精选一张震撼的宇宙影像，并搭配专业的文字解读。影像内容涵盖星云、星系、恒星、行星、宇宙射线、深空天体等各类天文景观，是全球天文爱好者了解宇宙的重要窗口。</p>
+        <p>本页面借助 NASA 官方开放接口，实现了生日星空图查询功能。你只需选择自己的出生日期，就能查看在你出生当天，NASA 发布的专属宇宙画面。每一张星空图都记录着浩瀚宇宙的瞬间，让我们得以跨越时间，邂逅独属于自己的宇宙浪漫。</p>
+        <p>温馨提示：平台最早可查询日期为1995年6月16日，接口采用公开免费密钥，若频繁使用出现访问限制，可稍后再次尝试。</p>
+    </div>
+    <div class="footer">
+        数据来源：NASA APOD 公开接口 | 复刻 NASA 生日星空查询页面
+    </div>
+    <script>
+        const NASA_API_KEY = 'DEMO_KEY';
+        const apiUrl = `https://api.nasa.gov/planetary/apod`;
+        const birthDate = document.getElementById('birthDate');
+        const searchBtn = document.getElementById('searchBtn');
+        const tip = document.getElementById('tip');
+        const resultBox = document.getElementById('resultBox');
+        const starImg = document.getElementById('starImg');
+        const imgTitle = document.getElementById('imgTitle');
+        const imgDate = document.getElementById('imgDate');
+        const imgDesc = document.getElementById('imgDesc');
+        const today = new Date();
+        const minDate = '1995-06-16';
+        const maxDate = today.toISOString().split('T')[0];
+        birthDate.min = minDate;
+        birthDate.max = maxDate;
+        birthDate.value = maxDate;
+        async function getStarImage() {
+            const selectDate = birthDate.value;
+            if (!selectDate) {
+                tip.textContent = '请选择有效日期！';
+                tip.className = 'tip error';
+                return;
+            }
+            searchBtn.disabled = true;
+            tip.textContent = '正在加载 NASA 星空图，请稍候...';
+            tip.className = 'tip';
+            resultBox.style.display = 'none';
+            try{
+                const res = await fetch(`${apiUrl}?api_key=${NASA_API_KEY}&date=${selectDate}`);
+                if (!res.ok) throw new Error('数据获取失败');
+                const data = await res.json();
+                imgTitle.textContent = data.title;
+                imgDate.textContent = `拍摄日期：${data.date}`;
+                starImg.src = data.url;
+                starImg.alt = data.title;
+                imgDesc.textContent = data.explanation;
+                resultBox.style.display = 'block';
+                tip.textContent = '查询成功！';
+            } catch (err) {
+                tip.textContent = '查询失败，请稍后重试或更换日期';
+                tip.className = 'tip error';
+            } finally {
+                searchBtn.disabled = false;
+            }
+        }
+        searchBtn.addEventListener('click', getStarImage);
+    </script>
+</body>
+</html>

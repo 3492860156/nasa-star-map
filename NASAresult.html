@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA 生日星空图查询</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+        body {
+            background-color: #0b0d22;
+            color: #ffffff;
+            line-height: 1.6;
+            padding: 30px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.2rem;
+            color: #f0f4ff;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.1rem;
+            color: #a9b8e8;
+        }
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto 40px;
+            text-align: center;
+            padding: 20px;
+            background: #151a3d;
+            border-radius: 8px;
+            border: 1px solid #36428a;
+        }
+        .search-box label {
+            font-size: 1rem;
+            margin-right: 8px;
+            color: #e2e8ff;
+        }
+        .search-box input {
+            width: 80px;
+            padding: 8px;
+            margin: 0 5px;
+            border: 1px solid #36428a;
+            background: #0b0d22;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 1rem;
+            text-align: center;
+        }
+        .search-box button {
+            padding: 9px 20px;
+            margin-left: 15px;
+            background: #2c3470;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .search-box button:hover {background: #424e99;}
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        .img-box {
+            flex: 1 1 600px;
+            text-align: center;
+        }
+        .star-img {
+            width: 100%;
+            max-width: 700px;
+            border: 3px solid #2c3470;
+            border-radius: 8px;
+            box-shadow: 0 0 25px #1a2255;
+        }
+        .img-tip {
+            margin-top: 12px;
+            color: #cccccc;
+            font-size: 0.95rem;
+        }
+        .text-container {
+            flex: 1 1 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        .text-frame {
+            background-color: #151a3d;
+            border: 1px solid #36428a;
+            border-radius: 6px;
+            padding: 20px;
+            min-height: 220px;
+        }
+        .text-frame h3 {
+            color: #79a8ff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #36428a;
+            padding-bottom: 8px;
+        }
+        .text-frame p {
+            color: #e2e8ff;
+            font-size: 1rem;
+            min-height: 140px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #8892c8;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            body {padding: 15px;}
+            .header h1 {font-size: 1.8rem;}
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>NASA 生日星空图查询系统</h1>
+        <p>输入您的生日，查看对应日期专属宇宙影像</p>
+    </div>
+    <div class="search-box">
+        <label>月份：</label>
+        <input type="number" id="month" placeholder="01-12" min="1" max="12">
+        <label>日期：</label>
+        <input type="number" id="day" placeholder="01-31" min="1" max="31">
+        <button onclick="searchStarImage()">立即查询</button>
+    </div>
+    <div class="container">
+        <div class="img-box">
+            <img class="star-img" id="starImage" src="img/default.jpg" alt="星空图">
+            <p class="img-tip" id="imgTip">请输入生日进行查询</p>
+        </div>
+        <div class="text-container">
+            <div class="text-frame">
+                <h3>中文描述 | Chinese Description</h3>
+                <p id="cnText">请先查询日期，此处显示对应星空图中文介绍。</p>
+            </div>
+            <div class="text-frame">
+                <h3>英文描述 | English Description</h3>
+                <p id="enText">Please query the date first. The English introduction will be displayed here.</p>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>NASA Official Image Archive | 美国国家航空航天局 影像资料库</p>
+    </div>
+    <script>
+        const starData = {
+            // 一月 (January)
+            "0101": {
+                cn: "这张NASA影像捕捉到新年伊始的浩瀚银河，星光如钻石般洒落在宇宙画布上，象征着新一年的希望与无限可能。",
+                en: "This NASA image captures the vast Milky Way at the start of the new year, with stars like diamonds scattered across the cosmic canvas, symbolizing hope and infinite possibilities for the year ahead."
+            },
+            "0102": {
+                cn: "NASA望远镜记录了这片距离我们数百万光年的星系，螺旋状的旋臂中孕育着无数新生恒星，如同宇宙中永不熄灭的烟火。",
+                en: "NASA telescopes have recorded this galaxy millions of light-years away, where countless new stars are born in its spiral arms, like never-ending fireworks in the universe."
+            },
+            "0103": {
+                cn: "这是哈勃拍摄的猎户座星云局部，温暖的氢气在黑暗中发出幽蓝的光芒，仿佛宇宙深处的一盏明灯，指引着探索者的方向。",
+                en: "This is a detail of the Orion Nebula captured by Hubble. Warm hydrogen gas glows deep blue in the darkness, like a lighthouse in the depths of the universe, guiding explorers."
+            },
+            "0104": {
+                cn: "画面中的环状星云是恒星死亡前的最后一次华丽绽放，外层气体被抛射向太空，形成这枚宇宙中最美丽的“戒指”。",
+                en: "The Ring Nebula in the image is a star's final magnificent bloom before death. Its outer layers of gas are ejected into space, forming this most beautiful 'ring' in the cosmos."
+            },
+            "0105": {
+                cn: "NASA探测器传回的木星大红斑影像，这个比地球还大的风暴已肆虐数百年，橘红色的云层翻滚不息，展现着气态巨行星的狂暴力量。",
+                en: "This image of Jupiter's Great Red Spot was beamed back by NASA probes. This storm, larger than Earth, has raged for centuries, with orange-red clouds churning endlessly, showing the violent power of gas giants."
+            },
+            "0106": {
+                cn: "这片由尘埃和气体组成的宇宙尘埃带，在恒星光芒的映衬下呈现出天鹅绒般的质感，如同宇宙编织的神秘面纱。",
+                en: "This cosmic dust lane, composed of dust and gas, takes on a velvety texture against the light of stars, like a mysterious veil woven by the universe."
+            },
+            "0107": {
+                cn: "哈勃望远镜捕捉到的蝴蝶星云，双极喷流将恒星外层物质抛向太空，形成了这对展翅欲飞的宇宙蝴蝶，美得令人窒息。",
+                en: "The Butterfly Nebula captured by the Hubble Space Telescope. Bipolar jets eject the star's outer layers into space, forming this pair of cosmic butterflies ready to take flight, breathtakingly beautiful."
+            },
+            "0108": {
+                cn: "这张影像记录了仙女座星系与银河系未来的相遇，两个庞然大物将在数十亿年后合并，诞生一个全新的椭圆星系。",
+                en: "This image records the future encounter between the Andromeda Galaxy and the Milky Way. The two giants will merge billions of years from now, giving birth to a new elliptical galaxy."
+            },
+            "0109": {
+                cn: "画面中的蟹状星云是超新星爆发后的遗迹，中心脉冲星每秒旋转30次，发出的辐射照亮了整个星云，如同宇宙中的灯塔。",
+                en: "The Crab Nebula in the image is the remnant of a supernova explosion. The central pulsar spins 30 times per second, and its radiation illuminates the entire nebula, like a lighthouse in the cosmos."
+            },
+            "0110": {
+                cn: "NASA拍摄的创生之柱，高耸的气体柱中正在孕育新的恒星，每一缕光芒都是宇宙诞生的见证，充满了生命的力量。",
+                en: "NASA's Pillars of Creation. New stars are being born in the towering columns of gas. Every ray of light is a witness to cosmic birth, full of the power of life."
+            },
+            "0111": {
+                cn: "这张影像展现了土星环的细节，无数冰晶和岩石碎片组成的环带，在阳光的照射下呈现出梦幻般的彩虹光泽。",
+                en: "This image shows the details of Saturn's rings. Countless bands of ice crystals and rock fragments display dreamlike rainbow hues under sunlight."
+            },
+            "0112": {
+                cn: "画面中的黑洞是宇宙中最神秘的天体，强大的引力扭曲了周围的时空，连光都无法逃脱，只留下一圈炽热的吸积盘。",
+                en: "The black hole in the image is the most mysterious object in the universe. Its powerful gravity warps surrounding spacetime, trapping even light, leaving only a ring of hot accretion disk."
+            },
+            "0113": {
+                cn: "这是哈勃拍摄的草帽星系，明亮的核球被一圈尘埃带环绕，如同宇宙中一顶巨大的墨西哥宽边帽，优雅而神秘。",
+                en: "This is the Sombrero Galaxy captured by Hubble. Its bright bulge is surrounded by a dust lane, like a giant Mexican sombrero in the cosmos, elegant and mysterious."
+            },
+            "0114": {
+                cn: "影像中的猎户座大星云是距离我们最近的恒星形成区，温暖的粉色光芒来自新生恒星发出的紫外线，照亮了周围的气体云。",
+                en: "The Orion Nebula in the image is the closest star-forming region to us. The warm pink glow comes from ultraviolet light emitted by new stars, illuminating the surrounding gas clouds."
+            },
+            "0115": {
+                cn: "这是NASA拍摄的木星卫星木卫一，表面布满了活跃的火山，喷发的硫磺形成了黄色的斑点，如同木星的一颗“火焰卫星”。",
+                en: "This is Io, a moon of Jupiter, photographed by NASA. Its surface is covered with active volcanoes, and erupting sulfur forms yellow spots, like a 'flaming moon' of Jupiter."
+            },
+            "0116": {
+                cn: "画面中的玫瑰星云是一个巨大的电离氢区，中心的星团照亮了周围的气体，使其呈现出玫瑰花瓣般的粉色，浪漫而迷人。",
+                en: "The Rosette Nebula in the image is a large H II region. The central star cluster illuminates the surrounding gas, giving it a pink hue like rose petals, romantic and charming."
+            },
+            "0117": {
+                cn: "这张影像捕捉到了极光的壮丽景象，带电粒子与地球大气碰撞，在极地上空形成了绿色的光幕，如同宇宙的裙摆。",
+                en: "This image captures the magnificent aurora. Charged particles collide with Earth's atmosphere, forming green curtains of light over the poles, like the hem of the universe's skirt."
+            },
+            "0118": {
+                cn: "哈勃望远镜拍摄的螺旋星系，旋臂中蓝色的年轻恒星与黄色的年老恒星交相辉映，讲述着星系数十亿年的演化故事。",
+                en: "A spiral galaxy photographed by the Hubble Space Telescope. Blue young stars and yellow old stars in its arms shine together, telling the story of the galaxy's billions of years of evolution."
+            },
+            "0119": {
+                cn: "画面中的行星状星云是类太阳恒星生命的终点，外层气体被抛射，中心留下一颗白矮星，形成这枚宇宙中的“猫眼”。",
+                en: "The planetary nebula in the image is the end of a Sun-like star's life. Outer layers of gas are ejected, leaving a white dwarf at the center, forming this 'cat's eye' in space."
+            },
+            "0120": {
+                cn: "这张NASA影像记录了月食过程中月亮的变化，地球的影子慢慢遮住月球，使其呈现出神秘的红铜色，如同宇宙的一次深呼吸。",
+                en: "This NASA image records the Moon's changes during a lunar eclipse. Earth's shadow slowly covers the Moon, giving it a mysterious copper color, like a deep breath of the universe."
+            },
+            "0121": {
+                cn: "影像中的马头星云是一个黑暗的分子云，背景的红色氢光芒勾勒出它的轮廓，如同宇宙中一匹奔腾的骏马，充满力量感。",
+                en: "The Horsehead Nebula in the image is a dark molecular cloud. The red glow of hydrogen in the background outlines its shape, like a galloping horse in the cosmos, full of power."
+            },
+            "0122": {
+                cn: "这是哈勃拍摄的仙女座星系核心，密集的恒星如同城市的灯光，照亮了星系的中心，展现着宇宙的繁华与喧嚣。",
+                en: "This is the core of the Andromeda Galaxy captured by Hubble. Dense stars, like city lights, illuminate the center of the galaxy, showing the bustle and noise of the universe."
+            },
+            "0123": {
+                cn: "画面中的双星系统由两颗恒星组成，它们相互环绕，彼此照亮，如同宇宙中一对永不分离的伴侣。",
+                en: "The binary star system in the image consists of two stars that orbit each other, illuminating each other, like a pair of inseparable companions in the cosmos."
+            },
+            "0124": {
+                cn: "这张NASA影像展现了火星表面的沙丘，风塑造的条纹如同火星的指纹，记录着这颗红色星球的气候变迁。",
+                en: "This NASA image shows sand dunes on the surface of Mars. Wind-sculpted ridges, like the Red Planet's fingerprints, record the climate changes of this world."
+            },
+            "0125": {
+                cn: "影像中的猎户座腰带三星，在夜空中连成一条直线，是古人导航的灯塔，也是无数神话故事的灵感来源。",
+                en: "The three stars of Orion's Belt in the image form a straight line in the night sky, a beacon for ancient navigators and the inspiration for countless myths."
+            },
+            "0126": {
+                cn: "这是哈勃拍摄的螺旋星系M101，巨大的旋臂如同风车般旋转，星云中诞生的恒星让它充满了活力。",
+                en: "This is the spiral galaxy M101 captured by Hubble. Its huge arms rotate like a pinwheel, and stars born in its nebulae give it vitality."
+            },
+            "0127": {
+                cn: "画面中的超新星遗迹是恒星死亡时爆发的产物，冲击波加热了周围的气体，使其发出耀眼的光芒，如同宇宙的烟火。",
+                en: "The supernova remnant in the image is the product of a star's death explosion. Shock waves heat the surrounding gas, making it glow brightly, like cosmic fireworks."
+            },
+            "0128": {
+                cn: "这张NASA影像捕捉到了木星的卫星欧罗巴，表面光滑的冰层下可能隐藏着液态海洋，是寻找地外生命的热门目标。",
+                en: "This NASA image captures Jupiter's moon Europa. Beneath its smooth icy surface may lie a liquid ocean, making it a prime target for finding extraterrestrial life."
+            },
+            "0129": {
+                cn: "影像中的三叶星云是一个复杂的恒星形成区，明亮的发射星云、暗星云和反射星云交织在一起，呈现出梦幻般的色彩。",
+                en: "The Trifid Nebula in the image is a complex star-forming region. Bright emission nebulae, dark nebulae, and reflection nebulae are intertwined, showing dreamlike colors."
+            },
+            "0130": {
+                cn: "这是哈勃拍摄的椭圆星系，古老的恒星如同金色的沙粒，填满了星系的核心，讲述着宇宙早期的故事。",
+                en: "This is an elliptical galaxy captured by Hubble. Ancient stars, like golden sand, fill the core of the galaxy, telling stories of the early universe."
+            },
+            "0131": {
+                cn: "画面中的星团是宇宙中恒星的“摇篮”，成千上万的恒星聚集在一起，如同夜空中的宝石群，璀璨夺目。",
+                en: "The star cluster in the image is a 'cradle' of stars in the universe. Thousands of stars gather together, like a cluster of jewels in the night sky, dazzling and eye-catching."
+            },
+        
+            // 二月 (February)
+            "0201": {
+                cn: "这张NASA影像展现了金星的大气层，浓厚的云层反射着阳光，让这颗行星如同宇宙中的一颗珍珠，闪耀着白色的光芒。",
+                en: "This NASA image shows the atmosphere of Venus. Thick clouds reflect sunlight, making the planet like a pearl in the cosmos, shining with a white glow."
+            },
+            "0202": {
+                cn: "影像中的螺旋星系NGC 1300，其旋臂对称而优美，如同宇宙中的一个巨大漩涡，孕育着无数的恒星。",
+                en: "The spiral galaxy NGC 1300 in the image has symmetrical and beautiful arms, like a giant vortex in the universe, nurturing countless stars."
+            },
+            "0203": {
+                cn: "这是哈勃拍摄的鹰状星云，创生之柱就位于其中，高耸的气体柱是恒星的诞生地，充满了生命的奇迹。",
+                en: "This is the Eagle Nebula captured by Hubble, home to the Pillars of Creation. The towering gas columns are stellar nurseries, full of the miracle of life."
+            },
+            "0204": {
+                cn: "画面中的极光在南极上空舞动，绿色和紫色的光带交织在一起，如同宇宙的一场盛大舞会，浪漫而绚烂。",
+                en: "Auroras dance over the South Pole in the image. Green and purple light bands are intertwined, like a grand ball of the universe, romantic and gorgeous."
+            },
+            "0205": {
+                cn: "这张NASA影像记录了彗星接近太阳的过程，冰物质受热升华，形成了长长的彗尾，如同宇宙中的“流浪者”。",
+                en: "This NASA image records a comet approaching the Sun. Ices sublime when heated, forming a long tail, like a 'wanderer' in the cosmos."
+            },
+            "0206": {
+                cn: "影像中的蟹状星云脉冲星，每秒旋转30次，发出的脉冲辐射如同宇宙中的灯塔信号，指引着天文学家的研究。",
+                en: "The pulsar in the Crab Nebula spins 30 times per second. Its pulsed radiation is like a lighthouse signal in the cosmos, guiding astronomers' research."
+            },
+            "0207": {
+                cn: "这是哈勃拍摄的草帽星系，明亮的核球和黑暗的尘埃带形成了鲜明对比，如同宇宙中一顶优雅的宽边帽。",
+                en: "This is the Sombrero Galaxy captured by Hubble. Its bright bulge contrasts sharply with the dark dust lane, like an elegant wide-brimmed hat in space."
+            },
+            "0208": {
+                cn: "画面中的火星表面布满了陨石坑，古老的河床痕迹暗示着这颗红色星球曾经可能存在液态水，甚至生命。",
+                en: "The surface of Mars in the image is covered with craters. Ancient riverbed traces suggest the Red Planet may once have had liquid water, and even life."
+            },
+            "0209": {
+                cn: "这张NASA影像展现了木星的大红斑，这个巨大的风暴已经肆虐了数百年，是太阳系中最著名的风暴之一。",
+                en: "This NASA image shows Jupiter's Great Red Spot. This enormous storm has raged for centuries and is one of the most famous storms in the solar system."
+            },
+            "0210": {
+                cn: "影像中的玫瑰星云是一个恒星形成区，中心的星团照亮了周围的气体，使其呈现出玫瑰花瓣般的粉色，浪漫至极。",
+                en: "The Rosette Nebula in the image is a star-forming region. The central star cluster illuminates the surrounding gas, giving it a pink hue like rose petals, extremely romantic."
+            },
+            "0211": {
+                cn: "这是哈勃拍摄的仙女座星系，距离我们约250万光年，是肉眼可见的最远天体之一，也是银河系未来的碰撞伙伴。",
+                en: "This is the Andromeda Galaxy captured by Hubble. About 2.5 million light-years away, it is one of the farthest objects visible to the naked eye and the Milky Way's future collision partner."
+            },
+            "0212": {
+                cn: "画面中的双星系统由两颗恒星组成，它们相互绕转，彼此引力的影响塑造了周围的空间，如同宇宙中的双人舞。",
+                en: "The binary star system in the image consists of two stars orbiting each other. Their mutual gravitational influence shapes the surrounding space, like a cosmic pas de deux."
+            },
+            "0213": {
+                cn: "这张NASA影像捕捉到了土星的光环，无数的冰晶和岩石碎片组成了这道壮丽的环带，在阳光的照射下闪闪发光。",
+                en: "This NASA image captures Saturn's rings. Countless ice crystals and rock fragments make up this magnificent band, shining brightly under sunlight."
+            },
+            "0214": {
+                cn: "影像中的心形星云，是恒星死亡后留下的气体云，在光线的照射下呈现出浪漫的心形，如同宇宙的情人节礼物。",
+                en: "The heart-shaped nebula in the image is a gas cloud left by a dying star. Illuminated by light, it takes on a romantic heart shape, like a Valentine's Day gift from the cosmos."
+            },
+            "0215": {
+                cn: "这是哈勃拍摄的螺旋星系M81，明亮的核球和优雅的旋臂让它成为最美丽的星系之一，距离我们约1200万光年。",
+                en: "This is the spiral galaxy M81 captured by Hubble. Its bright bulge and elegant arms make it one of the most beautiful galaxies, about 12 million light-years away."
+            },
+            "0216": {
+                cn: "画面中的猎户座星云是恒星的诞生地，温暖的气体和尘埃云在恒星的光芒下呈现出绚丽的色彩，充满了生命的活力。",
+                en: "The Orion Nebula in the image is a stellar nursery. Warm gas and dust clouds display brilliant colors under the light of stars, full of the vitality of life."
+            },
+            "0217": {
+                cn: "这张NASA影像展现了地球的夜景，城市的灯光如同繁星点点，照亮了这颗蓝色星球，展现着人类文明的繁荣。",
+                en: "This NASA image shows the night view of Earth. City lights, like twinkling stars, illuminate the blue planet, showing the prosperity of human civilization."
+            },
+            "0218": {
+                cn: "影像中的超新星1987A遗迹，中心的恒星爆发后留下了一圈明亮的光环，如同宇宙中的一枚戒指，记录着恒星的死亡。",
+                en: "The remnant of Supernova 1987A in the image. After the central star exploded, it left a bright ring, like a ring in the cosmos, recording the star's death."
+            },
+            "0219": {
+                cn: "这是哈勃拍摄的猫眼星云，行星状星云的典型代表，中心的白矮星发出的辐射照亮了外层的气体，形成了猫眼般的图案。",
+                en: "This is the Cat's Eye Nebula captured by Hubble, a classic example of a planetary nebula. Radiation from the central white dwarf illuminates the outer gas layers, forming a pattern like a cat's eye."
+            },
+            "0220": {
+                cn: "画面中的木卫二表面布满了冰裂纹，科学家认为冰层下可能存在液态海洋，是寻找地外生命的重要目标。",
+                en: "The surface of Europa in the image is covered with ice cracks. Scientists believe there may be a liquid ocean beneath the ice, making it an important target for finding extraterrestrial life."
+            },
+            "0221": {
+                cn: "这张NASA影像记录了日食的全过程，月球慢慢遮住太阳，在地球上投下巨大的阴影，如同宇宙的一次短暂“熄灯”。",
+                en: "This NASA image records the entire solar eclipse. The Moon slowly covers the Sun, casting a huge shadow on Earth, like a brief 'lights out' by the universe."
+            },
+            "0222": {
+                cn: "影像中的星团是由数千颗恒星组成的松散集合，它们共同诞生于同一片星云，如同宇宙中的一个大家庭。",
+                en: "The star cluster in the image is a loose collection of thousands of stars. They were all born in the same nebula, like a big family in the cosmos."
+            },
+            "0223": {
+                cn: "这是哈勃拍摄的旋涡星系M51，它与伴星系相互作用，引力的拉扯让旋臂变得更加明显，如同宇宙中的一场舞蹈。",
+                en: "This is the Whirlpool Galaxy M51 captured by Hubble. It interacts with its companion galaxy, and gravitational pull makes its arms more prominent, like a dance in the cosmos."
+            },
+            "0224": {
+                cn: "画面中的猎户座腰带三星，在夜空中非常显眼，是古代航海者和旅行者的重要导航标志，也是许多文化中的神话符号。",
+                en: "The three stars of Orion's Belt in the image are very prominent in the night sky. They were important navigation markers for ancient sailors and travelers, and mythological symbols in many cultures."
+            },
+            "0225": {
+                cn: "这张NASA影像展现了金星的表面，浓厚的大气层让这颗行星如同笼罩在一层面纱下，充满了神秘的色彩。",
+                en: "This NASA image shows the surface of Venus. Its thick atmosphere shrouds the planet like a veil, full of mystery."
+            },
+            "0226": {
+                cn: "影像中的蝴蝶星云，是恒星死亡时抛出的气体形成的，双极喷流让它呈现出蝴蝶展翅的形状，美丽而脆弱。",
+                en: "The Butterfly Nebula in the image is formed by gas ejected by a dying star. Bipolar jets give it the shape of a butterfly spreading its wings, beautiful and fragile."
+            },
+            "0227": {
+                cn: "这是哈勃拍摄的椭圆星系M87，中心存在一个超大质量黑洞，喷流延伸数千光年，是研究黑洞的重要目标。",
+                en: "This is the elliptical galaxy M87 captured by Hubble. It contains a supermassive black hole at its center, with jets extending thousands of light-years, making it an important target for black hole research."
+            },
+            "0228": {
+                cn: "画面中的火星峡谷是太阳系中最大的峡谷，长达数千公里，深达数千米，可能是远古河流侵蚀形成的。",
+                en: "The Martian canyon in the image is the largest in the solar system, thousands of kilometers long and several kilometers deep, possibly formed by ancient river erosion."
+            },
+            // 闰年2月29日
+            "0229": {
+                cn: "这张NASA影像捕捉到了宇宙中最遥远的星系之一，它的光芒经过了130亿年才到达地球，是我们窥探宇宙早期的窗口。",
+                en: "This NASA image captures one of the most distant galaxies in the universe. Its light took 13 billion years to reach Earth, a window into the early universe."
+            },
+			"0301": {
+			    cn: "这张NASA影像记录了明亮的疏散星团，无数年轻恒星紧密相依，在黑暗宇宙中绽放璀璨光芒，是恒星家族热闹的聚居地。",
+			    en: "This NASA image shows a bright open star cluster. Numerous young stars gather closely, shining brightly in the dark universe, forming a lively settlement of stellar families."
+			},
+			"0302": {
+			    cn: "画面展示了天王星的大气样貌，这颗冰巨行星整体呈现淡青色调，慵懒地侧卧在轨道之上，气质清冷又独特。",
+			    en: "The picture shows the atmosphere of Uranus. This ice giant appears pale cyan and lies sideways on its orbit, looking cold and unique."
+			},
+			"0303": {
+			    cn: "反射星云被周边恒星照亮，尘埃微粒散射星光，形成一片朦胧柔和的光雾，宛如宇宙中飘逸的轻纱。",
+			    en: "The reflection nebula is illuminated by surrounding stars. Dust particles scatter starlight and form a soft hazy glow, just like an elegant gauze floating in the universe."
+			},
+			"0304": {
+			    cn: "哈勃拍摄的星系碰撞场景，两大星系在引力作用下相互拉扯融合，扭曲的形态展现出宇宙磅礴又浪漫的演化力量。",
+			    en: "This galaxy collision scene was captured by Hubble. Two galaxies pull and merge under gravity. Their distorted shapes show the magnificent and romantic evolutionary power of the cosmos."
+			},
+			"0305": {
+			    cn: "水星近距离影像清晰展现密布的陨石坑，这颗离太阳最近的行星常年经受天体撞击，表面写满古老的宇宙印记。",
+			    en: "The close-up image of Mercury clearly shows dense craters. As the planet closest to the Sun, it has long suffered celestial impacts, with its surface covered with ancient cosmic marks."
+			},
+			"0306": {
+			    cn: "纤细的星际气体流在星系间穿梭，无形的引力牵引着气体缓慢流动，构筑出宇宙中看不见的连接脉络。",
+			    en: "Thin interstellar gas streams flow between galaxies. Invisible gravity pulls the gas to move slowly and builds the invisible connecting veins of the universe."
+			},
+			"0307": {
+			    cn: "球状星团由数十万颗老年恒星构成，整体结构紧实稳定，在银河系外围静静运转，是宇宙中古老的恒星部落。",
+			    en: "A globular cluster consists of hundreds of thousands of elderly stars. It has a compact and stable structure and operates quietly outside the Milky Way, being an ancient stellar tribe in the universe."
+			},
+			"0308": {
+			    cn: "土卫六是土星最大的卫星，浓厚的有机大气层笼罩整颗星球，地表存在液态烃湖泊，是太阳系最具探索价值的天体之一。",
+			    en: "Titan is Saturn's largest moon. A thick organic atmosphere covers the whole planet, and there are liquid hydrocarbon lakes on the surface. It is one of the most valuable celestial bodies for exploration in the solar system."
+			},
+			"0309": {
+			    cn: "弥漫星云广袤而缥缈，气体与尘埃交织在一起，没有固定轮廓，如同宇宙中无边无际的梦幻云海。",
+			    en: "The diffuse nebula is vast and ethereal. Gas and dust are intertwined without fixed outlines, just like boundless dreamy sea of clouds in the universe."
+			},
+			"0310": {
+			    cn: "超大质量黑洞周围的吸积盘高速旋转，物质摩擦产生亿万度高温，迸发出强烈辐射，成为宇宙中极致耀眼的光源。",
+			    en: "The accretion disk around the supermassive black hole rotates at high speed. Material friction generates billions of degrees of high temperature and emits intense radiation, becoming an extremely bright light source in the universe."
+			},
+			"0311": {
+			    cn: "小行星带位于火星与木星之间，无数岩石碎块环绕太阳运转，是太阳系形成初期残留下来的原始物质。",
+			    en: "The asteroid belt lies between Mars and Jupiter. Countless rock fragments orbit the Sun, which are primitive materials left over from the early formation of the solar system."
+			},
+			"0312": {
+			    cn: "星系旋臂上密集分布着星际尘埃，暗色条带遮挡后方星光，为明亮的星系增添了层次与神秘氛围。",
+			    en: "Interstellar dust is densely distributed on the galactic spiral arms. Dark bands block the starlight behind, adding layers and a mysterious atmosphere to the bright galaxy."
+			},
+			"0313": {
+			    cn: "脉冲星高速自转并规律发射电磁脉冲，如同宇宙中精准的信号灯塔，为天文学家研究天体物理提供重要参照。",
+			    en: "Pulsars rotate rapidly and emit electromagnetic pulses regularly. They are like precise signal beacons in the universe and provide important references for astronomers to study astrophysics."
+			},
+			"0314": {
+			    cn: "日珥从太阳表面喷涌而出，巨大的等离子体弧悬在太阳上空，气势磅礴，展现出恒星狂暴的活动状态。",
+			    en: "Solar prominences erupt from the solar surface. Huge plasma arcs hang above the Sun, magnificent and powerful, showing the violent activity of stars."
+			},
+			"0315": {
+			    cn: "遥远的不规则星系没有标准形态，恒星分布自由散漫，记录着宇宙星系多样且不拘一格的演化模样。",
+			    en: "Distant irregular galaxies have no standard shapes, and stars are distributed freely. They record the diverse and unrestrained evolution of cosmic galaxies."
+			},
+			"0316": {
+			    cn: "星际分子云是恒星诞生的温床，低温气体与尘埃不断聚集坍缩，在漫长时光中孕育出全新的恒星。",
+			    en: "Interstellar molecular clouds are cradles of star birth. Low-temperature gas and dust keep gathering and collapsing, giving birth to brand new stars over a long period of time."
+			},
+			"0317": {
+			    cn: "海王星高空的云层快速移动，这颗冰巨行星拥有太阳系最强风暴，冰冷的蓝色外表下暗藏汹涌的大气活动。",
+			    en: "Clouds move rapidly in the upper atmosphere of Neptune. This ice giant has the strongest storms in the solar system. Violent atmospheric activities are hidden under its cold blue appearance."
+			},
+			"0318": {
+			    cn: "双星互食现象中，两颗恒星相互遮挡亮度发生周期性变化，这种特殊天象成为观测恒星系统的重要依据。",
+			    en: "During the eclipsing binary phenomenon, two stars block each other and their brightness changes periodically. This special celestial phenomenon is an important basis for observing stellar systems."
+			},
+			"0319": {
+			    cn: "宇宙空洞是星系分布稀疏的区域，广袤虚空少有天体，反衬出宇宙空间的浩瀚与空旷。",
+			    en: "Cosmic voids are areas with sparse galaxies. There are few celestial bodies in the vast emptiness, setting off the immensity and vacancy of cosmic space."
+			},
+			"0320": {
+			    cn: "木卫二冰层表面布满交错裂纹，地质活动痕迹明显，冰层之下极有可能存在液态海洋，潜藏着地外生命的可能性。",
+			    en: "The icy surface of Europa is covered with staggered cracks with obvious traces of geological activity. There is most likely a liquid ocean under the ice, which holds the possibility of extraterrestrial life."
+			},
+			"0321": {
+			    cn: "春季星空群星错落排布，明亮的亮星与淡弱的暗星交织，勾勒出夜空优美的轮廓，是天文观测的绝佳时节。",
+			    en: "Stars are scattered in the spring starry sky. Bright stars and faint stars interweave and outline the beautiful outline of the night sky, making it an excellent season for astronomical observation."
+			},
+			"0322": {
+			    cn: "行星状星云层次分明，恒星晚年抛出的气体层层向外扩散，色彩渐变柔和，宛如宇宙雕琢的艺术珍品。",
+			    en: "The planetary nebula has distinct layers. Gas ejected by aging stars diffuses outward layer by layer with soft color gradients, just like art treasures carved by the universe."
+			},
+			"0323": {
+			    cn: "银河中心区域恒星极度密集，强光与星云交织，高能活动频繁，是整个银河系能量与物质的核心地带。",
+			    en: "Stars are extremely dense in the central region of the Milky Way. Strong light interweaves with nebulae and high-energy activities are frequent. It is the core area of energy and matter of the entire galaxy."
+			},
+			"0324": {
+			    cn: "流浪行星不围绕任何恒星运转，独自漂浮在星际空间，黑暗孤寂，是宇宙中孤独的漫游者。",
+			    en: "Rogue planets do not orbit any stars and float alone in interstellar space. Dark and lonely, they are lonely wanderers in the universe."
+			},
+			"0325": {
+			    cn: "彗星靠近太阳时冰体升华，拖出修长明亮的彗尾，在星际间划过优美轨迹，成为夜空中难得一见的美景。",
+			    en: "When a comet approaches the Sun, its ice body sublimates and drags out a long and bright tail, drawing a beautiful trajectory among stars and becoming a rare beauty in the night sky."
+			},
+			"0326": {
+			    cn: "星系团由数十乃至上百个星系聚集而成，彼此依靠引力束缚，构成宇宙中庞大的天体集团。",
+			    en: "A galaxy cluster is composed of dozens or even hundreds of galaxies bound by gravity, forming a huge celestial group in the universe."
+			},
+			"0327": {
+			    cn: "太阳耀斑瞬间释放巨大能量，辐射横扫周边空间，影响行星大气与星际环境，是恒星剧烈爆发的表现。",
+			    en: "Solar flares release huge energy in an instant. Radiation sweeps the surrounding space and affects planetary atmospheres and interstellar environments, which is a manifestation of violent stellar eruptions."
+			},
+			"0328": {
+			    cn: "火星极冠由干冰与冰水混合构成，随季节变化收缩与扩张，直观展现出这颗红色星球的气候变化规律。",
+			    en: "The Martian polar caps are composed of a mixture of dry ice and water ice. They shrink and expand with seasons, directly showing the climate change rules of the Red Planet."
+			},
+			"0329": {
+			    cn: "星际尘埃带遮挡后方星光，形成深邃的暗带，在明亮星云的映衬下，塑造出强烈的视觉层次感。",
+			    en: "Interstellar dust lanes block the starlight behind and form deep dark bands. Against the bright nebulae, they create a strong visual sense of hierarchy."
+			},
+			"0330": {
+			    cn: "晚型红巨星体积庞大、颜色赤红，是恒星步入晚年的形态，体积不断膨胀，逐步走向生命的终点。",
+			    en: "Late-type red giants are huge and bright red. They are the form of stars in their old age, expanding continuously and gradually moving towards the end of life."
+			},
+			"0331": {
+			    cn: "深空广角影像收录万千遥远星系，每一个光点都是一座独立的恒星世界，诉说着宇宙无限的辽阔。",
+			    en: "The deep-space wide-angle image records thousands of distant galaxies. Each light spot is an independent stellar world, telling the infinite vastness of the universe."
+			},
+			"0401": {
+				cn: "这片绚丽的发射星云被恒星紫外辐射点亮，氢气散发出迷人的玫红色，在漆黑太空里渲染出浪漫的色彩。",
+				en: "This gorgeous emission nebula is lit up by stellar ultraviolet radiation. Hydrogen emits charming rose red colors and renders romantic hues in the dark space."
+			},
+			"0402": {
+				cn: "土星环系统细节清晰可见，冰晶碎片大小不一，在阳光折射下泛着莹润光泽，是太阳系最美的天体景观之一。",
+				en: "Details of Saturn's ring system are clearly visible. Ice fragments vary in size and glow with soft luster under sunlight refraction, which is one of the most beautiful celestial landscapes in the solar system."
+			},
+			"0403": {
+				cn: "超新星冲击波向外扩散，不断冲击周遭星际物质，搅动整片区域的气体与尘埃，奏响宇宙壮阔的演化乐章。",
+				en: "Supernova shock waves spread outward and impact surrounding interstellar materials constantly, stirring gas and dust in the entire area and playing a magnificent evolutionary movement of the universe."
+			},
+			"0404": {
+				cn: "近地小行星形态不规则，常年在地球轨道附近穿行，是人类监测近地天体、防范宇宙撞击的重点目标。",
+				en: "Near-Earth asteroids have irregular shapes and travel near Earth's orbit all year round. They are key targets for humans to monitor near-Earth celestial bodies and prevent cosmic impacts."
+			},
+			"0405": {
+				cn: "室女座星系团星系云集，形态各异的星系在此汇聚，是研究大尺度宇宙结构的核心观测区域。",
+				en: "The Virgo Galaxy Cluster gathers numerous galaxies of different shapes. It is a core observation area for studying large-scale cosmic structures."
+			},
+			"0406": {
+				cn: "白矮星是中小质量恒星死亡后的残骸，体积小巧、密度极高，静静悬浮在宇宙中，走完恒星最后的旅程。",
+				en: "White dwarfs are remnants of medium and small mass stars after death. They are small in size and extremely high in density, floating quietly in the universe and finishing the final journey of stars."
+			},
+			"0407": {
+				cn: "地月同框影像从深空视角记录地球与月球，两颗天体相依相伴，尽显地月系统的和谐与唯美。",
+				en: "The Earth-Moon frame image records the Earth and the Moon from a deep space perspective. The two celestial bodies depend on each other, showing the harmony and beauty of the Earth-Moon system."
+			},
+			"0408": {
+				cn: "缠绕的星际云气形成奇特纹路，引力与粒子运动共同塑造出变幻莫测的形态，充满宇宙独有的艺术美感。",
+				en: "Twisted interstellar cloud gas forms strange lines. Gravity and particle movement jointly create unpredictable shapes, full of unique artistic beauty of the universe."
+			},
+			"0409": {
+				cn: "飞马座星系拥有舒展的旋臂，恒星沿着旋臂有序分布，整体结构匀称优雅，是经典的螺旋星系代表。",
+				en: "The Pegasus galaxy has stretched spiral arms. Stars are distributed along the arms in order. With a well-proportioned and elegant overall structure, it is a typical representative of spiral galaxies."
+			},
+			"0410": {
+				cn: "日冕层在日食阶段清晰显现，稀薄的等离子体围绕太阳外层延展，形成朦胧的光晕，神秘而壮丽。",
+				en: "The solar corona is clearly visible during a solar eclipse. Thin plasma extends around the outer layer of the Sun and forms a hazy halo, mysterious and magnificent."
+			},
+			"0411": {
+				cn: "冰卫星表面覆盖纯净冰层，反射清冷星光，在幽暗的星际空间中如同一块剔透的宇宙水晶。",
+				en: "The surface of the icy satellite is covered with pure ice, reflecting cold starlight. It is like a transparent cosmic crystal in the dark interstellar space."
+			},
+			"0412": {
+				cn: "星系潮汐尾由星系相互拉扯形成，细长的恒星流延伸数万光年，是引力塑造宇宙形态的直观证明。",
+				en: "Galactic tidal tails are formed by the pulling of galaxies. The long stellar streams extend tens of thousands of light-years, which is a direct proof that gravity shapes cosmic forms."
+			},
+			"0413": {
+				cn: "高能宇宙射线穿梭星际空间，肉眼无法观测，却时刻改变着星际环境，是宇宙深处潜藏的能量流。",
+				en: "High-energy cosmic rays travel through interstellar space. Invisible to the naked eye, they change the interstellar environment all the time and are hidden energy flows in the depths of the universe."
+			},
+			"0414": {
+				cn: "春季银河缓缓升起，星带横贯夜空，明暗星云交错，勾勒出整条银河壮阔的身姿。",
+				en: "The spring Milky Way rises slowly. The star belt runs across the night sky with bright and dark nebulae intertwined, outlining the magnificent figure of the entire Milky Way."
+			},
+			"0415": {
+				cn: "岩石行星地表崎岖，陨石坑、峡谷与高地交错分布，记录着数十亿年以来的天体撞击与地质演变。",
+				en: "The surface of rocky planets is rugged, with craters, canyons and highlands distributed alternately, recording billions of years of celestial impacts and geological evolution."
+			},
+			"0416": {
+				cn: "复合星云融合发射、反射与暗星云三种形态，色彩层次丰富，结构复杂，是宇宙星云景观的集大成者。",
+				en: "Composite nebulae integrate three forms: emission, reflection and dark nebulae. They have rich color layers and complex structures, being the masterpieces of cosmic nebula landscapes."
+			},
+			"0417": {
+				cn: "中子星密度超乎想象，一颗中子星的质量便可媲美大质量恒星，极致的物理特性吸引着无数天文学家探索。",
+				en: "The density of neutron stars is beyond imagination. A single neutron star can match the mass of a massive star. Its extreme physical characteristics attract countless astronomers to explore."
+			},
+			"0418": {
+				cn: "星际风席卷星云区域，推动气体与尘埃不断流动，持续改变星云的外形，让宇宙景观时刻处于动态变化之中。",
+				en: "Stellar winds sweep through nebula areas and push gas and dust to flow continuously, constantly changing the shape of nebulae and keeping cosmic landscapes in dynamic changes all the time."
+			},
+			"0419": {
+				cn: "遥远矮星系体型小巧，依附在大星系周边运转，是研究星系起源与演化的重要天然样本。",
+				en: "Distant dwarf galaxies are small in size and operate around large galaxies. They are important natural samples for studying the origin and evolution of galaxies."
+			},
+			"0420": {
+				cn: "月表高地与月海分界分明，浅色高地古老多坑，深色月海由玄武岩构成，是月球地质风貌的典型写照。",
+				en: "The boundary between lunar highlands and maria is clear. The light-colored ancient highlands are full of craters, and the dark maria are composed of basalt, which is a typical portrayal of the lunar geological features."
+			},
+			"0421": {
+				cn: "气态巨行星大气条纹清晰，不同色调的云带平行分布，剧烈的大气环流塑造出独特的行星外观。",
+				en: "The atmospheric stripes of gas giants are clear. Cloud bands of different tones are distributed in parallel. Violent atmospheric circulation creates unique planetary appearances."
+			},
+			"0422": {
+				cn: "星际分子密布的星云内部，复杂有机分子在此诞生，为生命起源提供了重要的物质基础。",
+				en: "Inside nebulae densely covered with interstellar molecules, complex organic molecules are born here, providing an important material basis for the origin of life."
+			},
+			"0423": {
+				cn: "透镜状星系形态介于椭圆星系与螺旋星系之间，外形圆润扁平，是星系演化过程中的过渡形态。",
+				en: "Lenticular galaxies are between elliptical galaxies and spiral galaxies in shape, round and flat. They are transitional forms in the process of galaxy evolution."
+			},
+			"0424": {
+				cn: "深空星场布满密密麻麻的遥远恒星与星系，每一个微小光点，都是一段遥远而精彩的宇宙故事。",
+				en: "The deep star field is full of dense distant stars and galaxies. Every tiny light spot tells a distant and wonderful cosmic story."
+			},
+			"0425": {
+				cn: "太阳活动极大期，黑子、耀斑与日珥频繁出现，恒星整体活跃度达到顶峰，尽显恒星的强大能量。",
+				en: "During the solar maximum, sunspots, flares and prominences appear frequently. The overall activity of the star reaches its peak, showing the powerful energy of stars."
+			},
+			"0426": {
+				cn: "双星系统轨道相互缠绕，两颗恒星彼此制约、共生演化，成为宇宙中稳定又浪漫的恒星组合。",
+				en: "The orbits of binary star systems are intertwined. The two stars restrict each other and evolve symbiotically, becoming a stable and romantic stellar combination in the universe."
+			},
+			"0427": {
+				cn: "尘埃星云遮挡后方星光，形成明暗交错的画面，如同宇宙绘制的水墨画卷，意境悠远。",
+				en: "Dust nebulae block the starlight behind and form pictures with alternating light and shade. Just like ink paintings drawn by the universe, they have a distant artistic conception."
+			},
+			"0428": {
+				cn: "外太阳系冰天体常年处于极寒环境，表面冰层厚实，保留着太阳系诞生之初的原始物质成分。",
+				en: "Ice celestial bodies in the outer solar system are in extremely cold environments all year round with thick surface ice, retaining the original material composition from the birth of the solar system."
+			},
+			"0429": {
+				cn: "星系旋臂末端恒星分布稀疏，星云愈发缥缈，由密到疏的变化展现出星系自然的延伸形态。",
+				en: "Stars are sparsely distributed at the ends of galactic spiral arms, and nebulae become more ethereal. The change from dense to sparse shows the natural extending form of galaxies."
+			},
+			"0430": {
+				cn: "跨星系气体桥连接两个相邻星系，物质在星系之间流转，成为星系互动与物质交换的通道。",
+				en: "Intergalactic gas bridges connect two adjacent galaxies. Materials flow between galaxies and become channels for galaxy interaction and material exchange."
+			},
+			"0501": {
+				cn: "初夏星空澄澈透亮，亮星次第排布，柔和星光洒满天际，搭配淡淡星云，营造出静谧悠然的宇宙氛围。",
+				en: "The early summer starry sky is clear and bright. Bright stars are arranged one after another, and soft starlight fills the sky. With faint nebulae, it creates a quiet and leisurely cosmic atmosphere."
+			},
+			"0502": {
+				cn: "哈勃捕捉的星系核光芒耀眼，核心区域聚集海量恒星与高能物质，是整个星系能量辐射的中心。",
+				en: "The galactic nucleus captured by Hubble shines brightly. A large number of stars and high-energy materials gather in the core area, which is the center of energy radiation of the entire galaxy."
+			},
+			"0503": {
+				cn: "陨石表面布满撞击痕迹，作为太阳系原始碎屑，它携带着远古宇宙的信息降临地球。",
+				en: "The surface of meteorites is covered with impact marks. As primitive debris of the solar system, it carries information of the ancient universe to the Earth."
+			},
+			"0504": {
+				cn: "延展的星云丝带在太空飘动，气体被恒星风拉伸成纤细形态，色彩柔美，宛如宇宙舞动的绸带。",
+				en: "Extended nebula ribbons float in space. Gas is stretched into slender shapes by stellar winds with soft colors, just like ribbons dancing in the universe."
+			},
+			"0505": {
+				cn: "冥王星表面色彩丰富，平原、冰川与高地交织，这颗矮行星保留着外太阳系独有的清冷地貌。",
+				en: "Pluto has a colorful surface with plains, glaciers and highlands intertwined. This dwarf planet retains the unique cold landforms of the outer solar system."
+			},
+			"0506": {
+				cn: "星暴星系内部恒星诞生速度极快，整片区域星光璀璨，密集的新生恒星让星系充满蓬勃生机。",
+				en: "Stars are born at an extremely fast speed inside starburst galaxies. The whole area is bright with stars, and dense newborn stars make the galaxy full of vitality."
+			},
+			"0507": {
+				cn: "日偏食天象中，月球逐步遮挡太阳，阳光透过边缘缝隙洒落，在地面形成独特的光影效果。",
+				en: "During a partial solar eclipse, the Moon gradually blocks the Sun. Sunlight spills through the edge gaps and forms unique light and shadow effects on the ground."
+			},
+			"0508": {
+				cn: "星际冰晶微粒反射光线，在星云内部形成片片亮斑，清冷色调让这片星云显得纯净而梦幻。",
+				en: "Interstellar ice crystal particles reflect light and form bright spots inside the nebula. The cold tone makes this nebula pure and dreamy."
+			},
+			"0509": {
+				cn: "大质量恒星演化迅猛，生命周期短暂，晚年爆发形成超新星，用壮烈的终结回馈整片星际空间。",
+				en: "Massive stars evolve rapidly with short lifespans. They erupt into supernovae in their later years and feed the entire interstellar space with a magnificent end."
+			},
+			"0510": {
+				cn: "星系外围的恒星分布松散，星际物质丰富，是星系与宇宙虚空过渡的边缘地带。",
+				en: "Stars on the periphery of galaxies are loosely distributed with abundant interstellar materials, which are the marginal zones transitioning between galaxies and cosmic voids."
+			},
+			"0511": {
+				cn: "木卫一火山活动频繁，岩浆不断喷涌，硫磺物质遍布地表，是太阳系地质活动最活跃的卫星。",
+				en: "Io has frequent volcanic activities with continuous magma eruptions. Sulfur substances spread all over the surface, making it the most geologically active satellite in the solar system."
+			},
+			"0512": {
+				cn: "狭长暗星云横亘星空，如同宇宙中的黑色长河，分割整片星区，视觉冲击力十足。",
+				en: "The long dark nebula stretches across the starry sky, just like a black long river in the universe, dividing the entire star region with strong visual impact."
+			},
+			"0513": {
+				cn: "多星系集群聚集在同一空域，彼此引力相互影响，共同构成庞大的宇宙天体系统。",
+				en: "Multiple galaxy clusters gather in the same airspace. Their mutual gravitational influence jointly forms a huge cosmic celestial system."
+			},
+			"0514": {
+				cn: "恒星风持续吹拂周边星云，不断重塑星云轮廓，亿万年的吹拂造就了如今独特的星云形态。",
+				en: "Stellar winds blow continuously on surrounding nebulae and reshape nebula outlines. Billions of years of blowing have created today's unique nebula shapes."
+			},
+			"0515": {
+				cn: "近距双星彼此环绕旋转，距离极近，物质相互流转，形成罕见的恒星物质交流现象。",
+				en: "Close binary stars orbit each other at an extremely short distance. Materials flow between them, forming a rare phenomenon of stellar material exchange."
+			},
+			"0516": {
+				cn: "深空红外影像穿透星际尘埃，显露出尘埃后方隐藏的恒星与星云，解锁肉眼无法观测的宇宙景象。",
+				en: "Deep-space infrared images penetrate interstellar dust and reveal hidden stars and nebulae behind the dust, unlocking cosmic scenes invisible to the naked eye."
+			},
+			"0517": {
+				cn: "火星云层随风流动，稀薄大气中的云团形态多变，为荒凉的红色星球增添了灵动气息。",
+				en: "Martian clouds flow with the wind. Cloud clusters in the thin atmosphere change variously, adding vivid atmosphere to the desolate Red Planet."
+			},
+			"0518": {
+				cn: "古老星团诞生于宇宙早期，内部恒星年龄相近，静静运转至今，是见证宇宙岁月的活化石。",
+				en: "Ancient star clusters were born in the early universe. Stars inside are similar in age and have operated quietly to this day, being living fossils witnessing cosmic years."
+			},
+			"0519": {
+				cn: "行星环细碎物质环绕行星运转，有序排布，在光照下折射出层层光晕，唯美而梦幻。",
+				en: "Fine materials of planetary rings orbit the planet and are arranged in order. They refract layers of halos under light, beautiful and dreamy."
+			},
+			"0520": {
+				cn: "这片浪漫星云色彩柔和，星点错落点缀，星云如轻纱漫舞，诠释着宇宙独有的温柔与诗意。",
+				en: "This romantic nebula has soft colors with scattered star dots. The nebula dances like light gauze, interpreting the unique tenderness and poetry of the universe."
+			},
+			"0521": {
+				cn: "星系碰撞后的融合阶段，天体逐步重组，扭曲的结构慢慢回归稳定，展现宇宙自愈与演化的力量。",
+				en: "In the merging stage after galaxy collision, celestial bodies reorganize gradually and distorted structures return to stability slowly, showing the power of cosmic self-healing and evolution."
+			},
+			"0522": {
+				cn: "太阳光球层纹理清晰，米粒组织遍布表面，细微的活动特征展现着恒星表层持续的能量运动。",
+				en: "The texture of the solar photosphere is clear, and granulation covers the surface. Tiny activity characteristics show the continuous energy movement on the stellar surface."
+			},
+			"0523": {
+				cn: "寒冷星际云温度极低，气体分子运动缓慢，是孕育新一代恒星的天然储备库。",
+				en: "Cold interstellar clouds have extremely low temperatures and gas molecules move slowly. They are natural reservoirs for breeding a new generation of stars."
+			},
+			"0524": {
+				cn: "望远镜深空巡天影像收录海量天体，每一处光斑都是遥远的星系，拓展着人类对宇宙边界的认知。",
+				en: "Telescope deep-sky survey images record a large number of celestial bodies. Every light spot is a distant galaxy, expanding human cognition of the cosmic boundary."
+			},
+			"0525": {
+				cn: "岩石卫星表面沟壑纵横，长期的天体撞击留下永久伤痕，诉说着星际空间的动荡环境。",
+				en: "The surface of rocky satellites is full of gullies. Long-term celestial impacts leave permanent scars, telling the turbulent environment of interstellar space."
+			},
+			"0526": {
+				cn: "亮星云与暗星云交错共生，一明一暗形成强烈对比，构筑出富有层次的立体宇宙画面。",
+				en: "Bright nebulae and dark nebulae coexist alternately. The strong contrast between light and dark constructs a layered three-dimensional cosmic picture."
+			},
+			"0527": {
+				cn: "高速旋转的脉冲星辐射束扫过空间，如同旋转的宇宙灯塔，规律的信号成为天文观测的精准标尺。",
+				en: "The radiation beam of high-speed rotating pulsars sweeps through space, just like rotating cosmic lighthouses. Regular signals become accurate rulers for astronomical observation."
+			},
+			"0528": {
+				cn: "银河旋臂内侧恒星密集，星云丰富，是银河系中物质与活动最活跃的核心区域之一。",
+				en: "Stars are dense and nebulae are abundant inside the galactic spiral arms, which are one of the core areas with the most active materials and activities in the Milky Way."
+			},
+			"0529": {
+				cn: "彗发包裹彗星内核，气体与尘埃向外弥散，在星际空间形成朦胧的球状光晕。",
+				en: "The coma wraps the comet's core. Gas and dust diffuse outward, forming a hazy spherical halo in interstellar space."
+			},
+			"0530": {
+				cn: "椭圆星系整体形态圆润，恒星均匀分布，少有星际尘埃，是演化至晚期的成熟星系形态。",
+				en: "Elliptical galaxies have a round overall shape with evenly distributed stars and few interstellar dust. They are mature galaxy forms evolved to the late stage."
+			},
+			"0531": {
+				cn: "星际激波面推动物质加速运动，压缩周边气体云，触发新一轮恒星的诞生循环。",
+				en: "Interstellar shock fronts push materials to move at high speed, compress surrounding gas clouds and trigger a new cycle of star birth."
+			},
+			"0601": {
+				cn: "盛夏的星空澄澈通透，漫天星辰有序排布，细碎星光交织成温柔画卷，尽显宇宙安然静谧之美。",
+				en: "The starry sky in midsummer is clear and transparent. Countless stars are arranged in order, and fine starlight weaves a gentle picture, showing the peaceful and quiet beauty of the universe."
+			},
+			"0602": {
+				cn: "大型螺旋星系拥有舒展优美的旋臂，无数新生恒星点缀其间，星系在引力作用下缓缓旋转，生生不息。",
+				en: "Large spiral galaxies have elegant spiral arms dotted with countless newborn stars. The galaxy rotates slowly under gravity, full of eternal vitality."
+			},
+			"0603": {
+				cn: "土卫五表面布满古老陨石坑，冰层与岩石交错分布，长久以来安静环绕土星运转，留存着太阳系远古的印记。",
+				en: "Rhea's surface is covered with ancient craters, with ice and rocks distributed alternately. It has orbited Saturn quietly for a long time, retaining the ancient marks of the solar system."
+			},
+			"0604": {
+				cn: "星云内部的恒星胚胎不断聚集坍缩，在高压与高温中逐步演化，即将迎来属于自己的星光时刻。",
+				en: "Stellar embryos inside the nebula keep gathering and collapsing, evolving gradually under high pressure and temperature, and are about to usher in their own shining moment."
+			},
+			"0605": {
+				cn: "日全食阶段太阳被月球完全遮挡，银白色日冕环绕天际，天地瞬间昏暗，是自然界极为震撼的天文奇观。",
+				en: "During total solar eclipse, the Sun is completely blocked by the Moon. Silvery white solar corona surrounds the sky and the world turns dark instantly, which is an extremely spectacular natural astronomical wonder."
+			},
+			"0606": {
+				cn: "相互作用星系被引力拉扯变形，星流与气体纽带连接彼此，展现出宇宙引力强大且奇妙的塑造能力。",
+				en: "Interacting galaxies are distorted by gravitational pull. Stellar streams and gas links connect them, showing the powerful and wonderful shaping ability of cosmic gravity."
+			},
+			"0607": {
+				cn: "遥远红矮星体积小巧、温度偏低，寿命远超普通恒星，是银河系中数量最多、最为普遍的恒星类型。",
+				en: "Distant red dwarfs are small in size and low in temperature, with a lifespan far longer than ordinary stars. They are the most common type of stars in the Milky Way."
+			},
+			"0608": {
+				cn: "星际尘埃云遮挡后方光源，形成明暗交错的暗带，在明亮星云衬托下，勾勒出富有层次的宇宙剪影。",
+				en: "Interstellar dust clouds block the light source behind and form alternating dark bands. Against bright nebulae, they outline layered cosmic silhouettes."
+			},
+			"0609": {
+				cn: "木星表层风暴连绵不绝，彩色云带平行延展，庞大的气态行星内部暗流涌动，蕴藏着惊人能量。",
+				en: "Storms rage continuously on Jupiter's surface, and colorful cloud bands extend in parallel. Under the surface of this huge gas giant, undercurrents surge with astonishing energy."
+			},
+			"0610": {
+				cn: "疏散星团由同期诞生的年轻恒星组成，彼此距离松散，一同在星际空间遨游，如同结伴远行的星辰旅者。",
+				en: "Open star clusters are composed of young stars born at the same time. They are loosely spaced and travel together in interstellar space, like star travelers on a journey."
+			},
+			"0611": {
+				cn: "行星状星云如同绽放的宇宙花朵，恒星晚年抛射的气体层层散开，色彩柔和梦幻，艺术感十足。",
+				en: "Planetary nebulae are like blooming cosmic flowers. Gas ejected by aging stars spreads layer by layer with soft and dreamy colors, full of artistic sense."
+			},
+			"0612": {
+				cn: "深空巡天镜头捕捉到无数遥远星系，每一个微小光点都是独立的星际世界，见证宇宙无边无际的辽阔。",
+				en: "Deep-sky survey cameras capture countless distant galaxies. Every tiny light spot is an independent interstellar world, witnessing the boundless vastness of the universe."
+			},
+			"0613": {
+				cn: "彗星飞越行星轨道，长长的彗尾被太阳风推向后方，在星空中划出灵动优美的轨迹。",
+				en: "Comets fly across planetary orbits. Their long tails are pushed backward by solar wind, drawing flexible and beautiful trajectories in the starry sky."
+			},
+			"0614": {
+				cn: "火星薄大气层散射光线，地表沙丘与岩石地貌清晰可见，红色星球的苍茫与荒凉尽收眼底。",
+				en: "Mars' thin atmosphere scatters light, and surface dunes and rock landforms are clearly visible. The vastness and desolation of the Red Planet are fully presented."
+			},
+			"0615": {
+				cn: "中子星体积极小、密度极致，高速自转并辐射脉冲信号，是宇宙中性质最为极端的致密天体。",
+				en: "Neutron stars are tiny in size and extremely high in density. They rotate at high speed and radiate pulse signals, being the most compact celestial bodies with extreme properties in the universe."
+			},
+			"0616": {
+				cn: "银河中心区域高能活动频繁，密集恒星与炽热星云交织，是整片星系能量与物质运转的核心枢纽。",
+				en: "High-energy activities are frequent in the central region of the Milky Way. Dense stars and hot nebulae intertwine, forming the core hub for the operation of energy and matter of the whole galaxy."
+			},
+			"0617": {
+				cn: "冰巨行星天王星整体呈淡蓝绿色，自转轴近乎平躺，独特的姿态让它成为太阳系中最另类的行星。",
+				en: "The ice giant Uranus is pale blue-green as a whole, with its rotation axis lying almost horizontally. Its unique posture makes it the most distinctive planet in the solar system."
+			},
+			"0618": {
+				cn: "反射星云依靠周边恒星照亮自身，尘埃微粒漫反射星光，形成一片朦胧柔和的光之海洋。",
+				en: "Reflection nebulae are illuminated by surrounding stars. Dust particles scatter starlight diffusely, forming a hazy and soft ocean of light."
+			},
+			"0619": {
+				cn: "星系团内数十个星系相互引力束缚，聚集在同一空域，构筑成宇宙尺度下庞大的天体集团。",
+				en: "Dozens of galaxies in galaxy clusters are bound by mutual gravity and gather in the same airspace, forming huge celestial groups on a cosmic scale."
+			},
+			"0620": {
+				cn: "月相变化呈现出月亮不同形态，阴晴圆缺循环往复，是夜空中最容易观测、最富有诗意的天象。",
+				en: "Lunar phases present different shapes of the Moon. The cycle of waxing and waning repeats endlessly, which is the most observable and poetic celestial phenomenon in the night sky."
+			},
+			"0621": {
+				cn: "夏至夜空星群璀璨，夏季大三角高悬天际，亮星两两呼应，成为夏日星空最标志性的景观。",
+				en: "The star group in the summer solstice night sky is bright. The Summer Triangle hangs high in the sky, with bright stars echoing each other, becoming the most iconic landscape of the summer starry sky."
+			},
+			"0622": {
+				cn: "恒星风持续吹拂星际空间，重塑星云外形、输送星际物质，潜移默化地改变着周边宇宙环境。",
+				en: "Stellar winds blow continuously in interstellar space, reshaping nebula shapes and transporting interstellar matter, quietly changing the surrounding cosmic environment."
+			},
+			"0623": {
+				cn: "近地小行星外形嶙峋，常年穿梭在地球轨道附近，是人类监测宇宙天体、防范星际撞击的重点目标。",
+				en: "Near-Earth asteroids have rugged shapes and travel near Earth's orbits all year round. They are key targets for humans to monitor celestial bodies and guard against interstellar impacts."
+			},
+			"0624": {
+				cn: "发射星云被紫外线激发发光，大面积气体呈现艳丽的红粉色，在漆黑太空里格外夺目。",
+				en: "Emission nebulae are excited to glow by ultraviolet rays. Large areas of gas show bright red and pink colors, standing out prominently in the dark space."
+			},
+			"0625": {
+				cn: "双星系统两颗恒星相依运转，引力相互制衡，构成宇宙中稳定持久的恒星组合形态。",
+				en: "Two stars in a binary system orbit dependently with balanced gravity, forming a stable and long-lasting combined form of stars in the universe."
+			},
+			"0626": {
+				cn: "土卫六浓密大气层包裹星球，地表分布液态烃湖泊，独特的生态环境让它备受天文研究者关注。",
+				en: "Titan is wrapped by a thick atmosphere, with liquid hydrocarbon lakes on the surface. Its unique environment makes it highly concerned by astronomical researchers."
+			},
+			"0627": {
+				cn: "超新星爆发遗迹向外扩散，冲击波搅动整片星际介质，将恒星演化的物质播撒向广阔宇宙。",
+				en: "Supernova remnants spread outward. Shock waves stir the entire interstellar medium and spread substances from stellar evolution to the vast universe."
+			},
+			"0628": {
+				cn: "宇宙暗物质分布在星系周边，无法直接观测，却凭借引力维系着整个星系结构的稳定。",
+				en: "Cosmic dark matter is distributed around galaxies. It cannot be observed directly, but it maintains the stability of the entire galactic structure by gravity."
+			},
+			"0629": {
+				cn: "行星环细碎冰晶环绕行星旋转，阳光折射出层层光泽，如梦似幻，是太阳系标志性美景。",
+				en: "Fine ice crystals of planetary rings rotate around the planet. Sunlight refracts layers of luster, dreamlike and gorgeous, being a landmark beauty of the solar system."
+			},
+			"0630": {
+				cn: "古老球状星团聚集数万颗老年恒星，结构紧密，在星系外围长久运转，是见证宇宙岁月的活化石。",
+				en: "Ancient globular clusters gather tens of thousands of elderly stars with compact structures. They operate outside galaxies for a long time, being living fossils that witness cosmic history."
+			},
+			"0701": {
+				cn: "七月星空明朗开阔，银河主带横贯夜空，星云明暗交织，勾勒出浩瀚星河最壮美的轮廓。",
+				en: "The starry sky in July is bright and open. The main band of the Milky Way runs across the night sky. Bright and dark nebulae intertwine to outline the most magnificent outline of the vast star river."
+			},
+			"0702": {
+				cn: "草帽星系拥有明亮核球与醒目尘埃带，外形酷似宽边礼帽，造型独特优雅，是经典观测星系之一。",
+				en: "The Sombrero Galaxy has a bright nucleus and striking dust lane, shaped like a wide-brimmed hat. With a unique and elegant appearance, it is one of the classic observed galaxies."
+			},
+			"0703": {
+				cn: "水星地表陨石坑密布，没有大气层保护，亿万年的天体撞击在星球表面留下密密麻麻的印记。",
+				en: "Mercury's surface is densely covered with craters. Without atmospheric protection, billions of years of celestial impacts have left dense marks on the planet."
+			},
+			"0704": {
+				cn: "恒星形成区气体不断坍缩，新生恒星接连诞生，整片区域活力四射，是宇宙生生不息的源泉。",
+				en: "Gas in star-forming regions keeps collapsing, and new stars are born one after another. The whole area is vibrant, being the source of eternal vitality of the universe."
+			},
+			"0705": {
+				cn: "日珥从太阳边缘凌空跃起，巨大的等离子弧悬于天际，气势恢宏，展现恒星磅礴的能量。",
+				en: "Solar prominences leap from the edge of the Sun. Huge plasma arcs hang in the sky, magnificent and powerful, showing the tremendous energy of stars."
+			},
+			"0706": {
+				cn: "蝴蝶星云由垂死恒星喷射的气体构成，两翼舒展如同振翅飞蝶，形态灵动唯美，令人惊叹。",
+				en: "The Butterfly Nebula is composed of gas ejected by dying stars. Its two wings stretch like a flying butterfly, with a vivid and beautiful shape that amazes viewers."
+			},
+			"0707": {
+				cn: "矮星系体型小巧，依附大型星系运行，结构简单，是研究星系起源与早期演化的天然样本。",
+				en: "Dwarf galaxies are small in size and operate attached to large galaxies. With simple structures, they are natural samples for studying the origin and early evolution of galaxies."
+			},
+			"0708": {
+				cn: "星际分子云蕴藏大量有机分子，是生命物质的摇篮，为星际空间孕育生命提供了基础条件。",
+				en: "Interstellar molecular clouds contain a large number of organic molecules, being cradles of life substances and providing basic conditions for life breeding in interstellar space."
+			},
+			"0709": {
+				cn: "海王星深蓝色大气之上，高速风暴纵横驰骋，冰巨行星冰冷外表下，藏着太阳系最狂暴的气象活动。",
+				en: "High-speed storms run rampant above Neptune's dark blue atmosphere. Beneath the cold appearance of this ice giant lies the most violent meteorological activity in the solar system."
+			},
+			"0710": {
+				cn: "地月合影从深空视角定格两颗天体，一蓝一灰相互陪伴，尽显地月系统和谐唯美的姿态。",
+				en: "The Earth-Moon group photo freezes the two celestial bodies from a deep space perspective. One blue and one gray accompany each other, showing the harmonious and beautiful posture of the Earth-Moon system."
+			},
+			"0711": {
+				cn: "透镜状星系介于椭圆星系与螺旋星系之间，形态扁平圆润，是星系漫长演化途中的过渡形态。",
+				en: "Lenticular galaxies are between elliptical and spiral galaxies with flat and round shapes, being transitional forms in the long evolution of galaxies."
+			},
+			"0712": {
+				cn: "极光在极地高空舞动，绿紫色光带流转变幻，如同天幕上流动的彩绸，浪漫而奇幻。",
+				en: "Auroras dance high above the polar regions. Green and purple light bands flow and change, like flowing colored silk on the sky, romantic and fantastic."
+			},
+			"0713": {
+				cn: "红巨星步入恒星晚年，体积极度膨胀，色泽赤红醒目，在星空中格外耀眼。",
+				en: "Red giants enter the old age of stars with extremely expanded volume and striking red color, standing out prominently in the starry sky."
+			},
+			"0714": {
+				cn: "星系潮汐尾由引力拉扯形成，绵长星流延伸数万光年，直观展现宇宙引力强大的塑造力量。",
+				en: "Galactic tidal tails are formed by gravitational pull. Long stellar streams extend tens of thousands of light-years, directly showing the powerful shaping force of cosmic gravity."
+			},
+			"0715": {
+				cn: "木卫二冰层表面裂纹交错，冰层之下极有可能存在液态海洋，是人类搜寻地外生命的重点目标。",
+				en: "The icy surface of Europa is covered with staggered cracks. There is most likely a liquid ocean under the ice, making it a key target for humans to search for extraterrestrial life."
+			},
+			"0716": {
+				cn: "复合星云融合多种星云形态，色彩层次丰富，结构错综复杂，是宇宙星云景观的集大成之作。",
+				en: "Composite nebulae integrate multiple nebula forms with rich color layers and complex structures, being masterpieces of cosmic nebula landscapes."
+			},
+			"0717": {
+				cn: "太阳黑子成群出现在光球层，温度低于周边区域，是太阳表面活动强弱的重要标志。",
+				en: "Sunspots appear in groups on the photosphere. Their temperature is lower than the surrounding area, which is an important symbol of the intensity of solar surface activities."
+			},
+			"0718": {
+				cn: "不规则星系没有固定形态，恒星分布自由散漫，记录着星系在复杂环境下的演化样貌。",
+				en: "Irregular galaxies have no fixed shapes, and stars are distributed freely, recording the evolutionary appearance of galaxies in complex environments."
+			},
+			"0719": {
+				cn: "深空红外影像穿透厚重尘埃，揭开星云后方隐藏的恒星世界，拓展人类观测宇宙的视野。",
+				en: "Deep-space infrared images penetrate thick dust, uncovering the star world hidden behind nebulae and expanding human vision for observing the universe."
+			},
+			"0720": {
+				cn: "火星峡谷绵延数千公里，沟壑纵横交错，是远古水流侵蚀留下的痕迹，见证红色星球的变迁。",
+				en: "Martian canyons stretch for thousands of kilometers with crisscross gullies. They are traces left by ancient water erosion, witnessing the changes of the Red Planet."
+			},
+			"0721": {
+				cn: "流浪行星脱离恒星束缚，独自漂浮在幽暗星际空间，成为宇宙中孤独的星际漫游者。",
+				en: "Rogue planets break away from stellar constraints and float alone in the dark interstellar space, becoming lonely interstellar wanderers in the universe."
+			},
+			"0722": {
+				cn: "猫眼星云结构精巧，多层气体环层层嵌套，中心白矮星持续辐射光芒，形似灵动的猫眼。",
+				en: "The Cat's Eye Nebula has an exquisite structure with multiple nested gas rings. The central white dwarf radiates light continuously, shaped like a vivid cat's eye."
+			},
+			"0723": {
+				cn: "星系之间的气体桥连通两片空域，物质自由流转，成为星系之间物质交换与互动的通道。",
+				en: "Gas bridges between galaxies connect two airspaces. Materials flow freely, becoming channels for material exchange and interaction between galaxies."
+			},
+			"0724": {
+				cn: "大质量恒星短暂而绚烂，生命末期壮烈爆发为超新星，用璀璨的终结回馈整片星际空间。",
+				en: "Massive stars are short-lived and gorgeous. They erupt into supernovae spectacularly at the end of their lives, feeding the entire interstellar space with a brilliant ending."
+			},
+			"0725": {
+				cn: "行星地表高地与盆地交错分布，陨石坑遍布各处，书写着岩石星球数十亿年的演化历史。",
+				en: "Highlands and basins are distributed alternately on the planetary surface, covered with craters everywhere, recording the billions of years of evolutionary history of rocky planets."
+			},
+			"0726": {
+				cn: "宇宙空洞广袤空旷，星系分布极为稀疏，反衬出宇宙空间的浩瀚与苍茫。",
+				en: "Cosmic voids are vast and empty with extremely sparse galaxies, setting off the immensity and vastness of cosmic space."
+			},
+			"0727": {
+				cn: "食双星周期性相互遮挡，亮度规律变化，是天文学家测算恒星参数、研究恒星系统的重要天象。",
+				en: "Eclipsing binaries block each other periodically with regular brightness changes. They are important celestial phenomena for astronomers to calculate stellar parameters and study stellar systems."
+			},
+			"0728": {
+				cn: "彗尾在太阳风作用下反向延展，修长明亮，让彗星成为夜空中极具辨识度的美丽天体。",
+				en: "Comet tails extend backward under the action of solar wind, long and bright, making comets distinctive and beautiful celestial bodies in the night sky."
+			},
+			"0729": {
+				cn: "银河旋臂外侧星云缥缈，恒星分布渐趋稀疏，由繁至简的变化勾勒出星系自然的延伸轮廓。",
+				en: "Nebulae outside the galactic spiral arms are ethereal, and stars become sparser gradually. The change from dense to sparse outlines the natural extended contour of the galaxy."
+			},
+			"0730": {
+				cn: "冰卫星表层冰层纯净透亮，反射清冷星光，在幽暗宇宙中如同天然雕琢的冰晶美玉。",
+				en: "The surface ice of icy satellites is pure and transparent, reflecting cold starlight, like naturally carved ice and jade in the dark universe."
+			},
+			"0731": {
+				cn: "高能宇宙射线穿梭星际之间，肉眼无法察觉，却时刻影响着星际环境与天体演化。",
+				en: "High-energy cosmic rays travel between stars. Invisible to the naked eye, they affect the interstellar environment and celestial evolution all the time."
+			},
+			"0801": {
+				cn: "八月夏夜星河浩荡，繁星密布天际，晚风伴星光，营造出悠然惬意的观星氛围。",
+				en: "The star river is vast on summer nights in August. Stars fill the sky. Night breeze accompanies starlight, creating a comfortable stargazing atmosphere."
+			},
+			"0802": {
+				cn: "漩涡星系旋臂卷曲优美，与伴星系相互缠绕，引力互动让整个星系形态灵动而富有张力。",
+				en: "The spiral arms of the Whirlpool Galaxy curl gracefully and intertwine with its companion galaxy. Gravitational interaction makes the whole galaxy vivid and dynamic."
+			},
+			"0803": {
+				cn: "金星浓厚大气层反射阳光，整颗星球通体亮白，是夜空中肉眼可见最明亮的行星。",
+				en: "Venus' thick atmosphere reflects sunlight, making the whole planet bright white. It is the brightest planet visible to the naked eye in the night sky."
+			},
+			"0804": {
+				cn: "创生之柱高耸挺立，致密气体柱中不断孕育新生恒星，是宇宙最著名的恒星诞生地之一。",
+				en: "The Pillars of Creation stand tall. New stars are constantly bred in dense gas columns, being one of the most famous stellar nurseries in the universe."
+			},
+			"0805": {
+				cn: "月食发生时地球阴影遮蔽月球，月亮变为暗红铜色，静谧又神秘，是经典的天文景观。",
+				en: "During a lunar eclipse, the Earth's shadow covers the Moon, turning it dark red and copper-colored, quiet and mysterious, a classic astronomical landscape."
+			},
+			"0806": {
+				cn: "星际尘埃带如同黑色绸带横亘星云之间，明暗对比强烈，塑造出极具艺术感的宇宙画面。",
+				en: "Interstellar dust lanes stretch between nebulae like black ribbons with strong light and shade contrast, creating cosmic pictures full of artistic sense."
+			},
+			"0807": {
+				cn: "超大质量黑洞居于星系核心，强大引力吞噬周边物质，炽热吸积盘成为宇宙中极致耀眼的光源。",
+				en: "Supermassive black holes lie at galactic cores. Powerful gravity swallows surrounding matter, and the hot accretion disk becomes an extremely bright light source in the universe."
+			},
+			"0808": {
+				cn: "猎户座星云色彩绚丽，气体与尘埃交织，距离地球较近，是天文爱好者最常观测的星云之一。",
+				en: "The Orion Nebula has gorgeous colors with intertwined gas and dust. It is relatively close to the Earth and one of the most observed nebulae for astronomy enthusiasts."
+			},
+			"0809": {
+				cn: "木星大红斑巨型风暴长久存续，橘红色云团不停翻涌，展现气态巨行星狂暴的大气活动。",
+				en: "Jupiter's Great Red Spot is a long-lived giant storm. Orange-red clouds churn endlessly, showing the violent atmospheric activities of the gas giant."
+			},
+			"0810": {
+				cn: "老年球状星团恒星密集，整体运行稳定，历经百亿年岁月，依旧在宇宙中平稳运转。",
+				en: "Old globular clusters have dense stars and stable overall operation. After tens of billions of years, they still operate steadily in the universe."
+			},
+			"0811": {
+				cn: "行星际物质散布在行星之间，由微小颗粒与稀薄气体组成，填充着太阳系的空旷区域。",
+				en: "Interplanetary matter is scattered between planets, composed of tiny particles and thin gas, filling the empty areas of the solar system."
+			},
+			"0812": {
+				cn: "玫瑰星云外形酷似盛放的玫瑰，粉色光晕温柔浪漫，是宇宙中极具诗意的星云景观。",
+				en: "The Rosette Nebula looks like a blooming rose with gentle and romantic pink halo, being a highly poetic nebula landscape in the universe."
+			},
+			"0813": {
+				cn: "星系融合后期结构逐步规整，扭曲的形态慢慢恢复常态，展现宇宙自我调节与演化的能力。",
+				en: "The structure gradually regularizes in the late stage of galaxy merging, and distorted shapes return to normal slowly, showing the ability of cosmic self-regulation and evolution."
+			},
+			"0814": {
+				cn: "太阳色球层活动丰富，色球耀斑与暗条交替出现，呈现出恒星表层多变的活动状态。",
+				en: "The solar chromosphere has rich activities. Chromospheric flares and filaments appear alternately, showing the changeable activity state of the stellar surface."
+			},
+			"0815": {
+				cn: "三叶星云三分格局分明，三种不同类型星云融为一体，色彩缤纷，层次极为丰富。",
+				en: "The Trifid Nebula has a distinct three-part pattern. Three different types of nebulae integrate into one, colorful and extremely layered."
+			},
+			"0816": {
+				cn: "冥王星地表纹理独特，冰川、平原与高地交错，矮行星独有的地貌尽显外太阳系的清冷气质。",
+				en: "Pluto has a unique surface texture with intertwined glaciers, plains and highlands. The unique landforms of this dwarf planet show the cold temperament of the outer solar system."
+			},
+			"0817": {
+				cn: "远距星系光芒历经数十亿年抵达地球，我们所见的画面，是宇宙遥远过去的模样。",
+				en: "The light of distant galaxies takes billions of years to reach the Earth. What we see is the appearance of the universe in the distant past."
+			},
+			"0818": {
+				cn: "双星伴月天象趣味十足，两颗亮星依偎月亮身旁，夜空构图精巧，观赏性极强。",
+				en: "The celestial phenomenon of two stars accompanying the Moon is full of fun. Two bright stars snuggle beside the Moon with an exquisite night sky composition and high ornamental value."
+			},
+			"0819": {
+				cn: "星暴星系内部恒星疯狂诞生，整片区域星光耀眼，短时间内演化出大量新生天体。",
+				en: "Stars are born frantically inside starburst galaxies. The whole area is bright with stars, and a large number of new celestial bodies evolve in a short time."
+			},
+			"0820": {
+				cn: "土星环分层清晰，无数冰晶颗粒有序环绕，阳光照射下流光溢彩，堪称太阳系最美景观。",
+				en: "Saturn's rings have clear layers. Countless ice particles orbit in order, shining brightly under sunlight, known as the most beautiful landscape in the solar system."
+			},
+			"0821": {
+				cn: "暗星云遮蔽后方星光，在明亮星场中形成黑色剪影，虚实结合，意境悠远。",
+				en: "Dark nebulae block the starlight behind and form black silhouettes in the bright star field. The combination of virtual and real creates a distant artistic conception."
+			},
+			"0822": {
+				cn: "白矮星是中小质量恒星的最终形态，体积小巧、密度惊人，安静结束恒星一生。",
+				en: "White dwarfs are the final form of medium and small mass stars. They are small in size and astonishing in density, ending the stellar life quietly."
+			},
+			"0823": {
+				cn: "小行星带碎石遍布，无数原始天体碎片环绕太阳运转，保留着太阳系形成初期的原始样貌。",
+				en: "The asteroid belt is full of rubble. Countless primitive celestial fragments orbit the Sun, retaining the original appearance of the early solar system."
+			},
+			"0824": {
+				cn: "星际激波压缩气体云，触发新一轮恒星诞生，让宇宙物质不断循环、生生不息。",
+				en: "Interstellar shock waves compress gas clouds and trigger a new round of star birth, making cosmic matter circulate continuously and thrive forever."
+			},
+			"0825": {
+				cn: "椭圆星系恒星分布均匀，几乎不含星际尘埃，是演化至末期、形态成熟的星系。",
+				en: "Elliptical galaxies have evenly distributed stars and almost no interstellar dust, being mature galaxies evolved to the final stage."
+			},
+			"0826": {
+				cn: "木卫一表面火山喷发频繁，硫磺岩浆四处流淌，是太阳系地质活动最剧烈的卫星。",
+				en: "Volcanic eruptions are frequent on Io's surface, with sulfur magma flowing everywhere. It is the satellite with the most intense geological activities in the solar system."
+			},
+			"0827": {
+				cn: "夏夜银河纵贯天际，星云明暗交错，星点疏密有致，构成一幅浑然天成的宇宙长卷。",
+				en: "The summer Milky Way runs across the sky. Nebulae are alternating bright and dark, and stars are arranged densely and sparsely, forming a natural cosmic scroll."
+			},
+			"0828": {
+				cn: "日冕物质抛射向外喷射大量等离子体，横扫行星际空间，是太阳剧烈活动的典型表现。",
+				en: "Coronal mass ejections eject a large amount of plasma outward and sweep the interplanetary space, which is a typical manifestation of violent solar activities."
+			},
+			"0829": {
+				cn: "冰质彗星内核坚硬，外层冰体受太阳辐射升华，化作飘逸彗尾，穿梭于星际之间。",
+				en: "The core of icy comets is hard. The outer ice sublimates under solar radiation and turns into elegant tails, traveling between stars."
+			},
+			"0830": {
+				cn: "星系外围星际介质稀薄，恒星数量减少，是星系向宇宙虚空过渡的边缘地带。",
+				en: "The interstellar medium is thin and stars decrease on the periphery of galaxies, which are marginal zones where galaxies transition to cosmic voids."
+			},
+			"0831": {
+				cn: "近地天体形态各异，人类持续监测追踪，以此守护地球免受星际撞击威胁。",
+				en: "Near-Earth celestial bodies have various shapes. Humans monitor and track them continuously to protect the Earth from the threat of interstellar impacts."
+			},
+			"0901": {
+				cn: "初秋星空清爽宜人，暑气褪去，星辰愈发清晰，是观测深空天体的绝佳时节。",
+				en: "The early autumn starry sky is fresh and pleasant. The summer heat fades away and stars become clearer, making it an excellent season for observing deep-space celestial bodies."
+			},
+			"0902": {
+				cn: "仙女座星系距离地球数百万光年，肉眼清晰可见，也是未来将与银河系碰撞的大型星系。",
+				en: "The Andromeda Galaxy is millions of light-years away from the Earth and visible to the naked eye. It is also a large galaxy that will collide with the Milky Way in the future."
+			},
+			"0903": {
+				cn: "火星极冠随季节变换大小，干冰与冰水组成的冰盖，直观展现红色星球的气候更迭。",
+				en: "The Martian polar caps change in size with seasons. Ice caps composed of dry ice and water ice directly show the climate changes of the Red Planet."
+			},
+			"0904": {
+				cn: "弥漫星云无边无际，气体与尘埃自由弥散，没有固定轮廓，如同宇宙中缥缈的云海。",
+				en: "Diffuse nebulae are boundless. Gas and dust diffuse freely without fixed outlines, just like ethereal sea of clouds in the universe."
+			},
+			"0905": {
+				cn: "脉冲星精准发射电磁脉冲，信号规律稳定，如同宇宙中永不失灵的导航灯塔。",
+				en: "Pulsars emit electromagnetic pulses accurately with regular and stable signals, like never-failing navigation beacons in the universe."
+			},
+			"0906": {
+				cn: "星系群由多个小型星系聚集而成，依靠引力抱团运转，构成宇宙中小型天体集团。",
+				en: "Galaxy groups are composed of multiple small galaxies, operating together by gravity and forming small celestial groups in the universe."
+			},
+			"0907": {
+				cn: "残月挂于黎明天际，轮廓纤细柔和，在浅淡天光映衬下，尽显清冷静谧之美。",
+				en: "The waning moon hangs over the dawn sky with a slender and soft outline. Against the pale sky light, it shows the beauty of coldness and tranquility."
+			},
+			"0908": {
+				cn: "恒星演化晚期外层气体不断剥离，逐步褪去外壳，最终露出致密的恒星内核。",
+				en: "The outer gas of stars keeps peeling off in the late stage of evolution. The shell fades gradually, finally exposing the dense stellar core."
+			},
+			"0909": {
+				cn: "天王星环纤细幽暗，由暗色碎石组成，不同于土星明亮光环，风格低调而神秘。",
+				en: "Uranus' rings are thin and dark, composed of dark rubble. Different from Saturn's bright rings, they are low-key and mysterious in style."
+			},
+			"0910": {
+				cn: "深空星场密密麻麻，无数遥远星系汇聚一帧，每一个光点都是一处遥远的星际世界。",
+				en: "The deep star field is dense with countless distant galaxies gathered in one frame. Every light spot is a distant interstellar world."
+			},
+			"0911": {
+				cn: "星际流沿着引力方向缓慢移动，串联起星云与星团，成为宇宙物质输送的纽带。",
+				en: "Interstellar streams move slowly along the direction of gravity, connecting nebulae and star clusters, and becoming links for cosmic material transportation."
+			},
+			"0912": {
+				cn: "日偏食光影奇特，月球遮挡部分太阳，地面光影斑驳，形成难得一见的趣味天象。",
+				en: "Partial solar eclipses have peculiar light and shadow. The Moon blocks part of the Sun, and the ground is dappled with light and shadow, forming a rare interesting celestial phenomenon."
+			},
+			"0913": {
+				cn: "岩石卫星表面饱经撞击，伤痕遍布，记录着数十亿年星际环境的动荡与变迁。",
+				en: "The surface of rocky satellites has suffered numerous impacts and is full of scars, recording the turbulence and changes of the interstellar environment for billions of years."
+			},
+			"0914": {
+				cn: "发射星云受高能射线激发，整体呈现艳丽色彩，在黑暗宇宙中格外绚烂夺目。",
+				en: "Emission nebulae are excited by high-energy rays and show bright colors as a whole, extremely gorgeous and eye-catching in the dark universe."
+			},
+			"0915": {
+				cn: "相互绕转的双星系统步调一致，引力彼此约束，长久稳定地共存于星际空间。",
+				en: "Binary star systems that orbit each other keep the same pace. Restricted by mutual gravity, they coexist stably in interstellar space for a long time."
+			},
+			"0916": {
+				cn: "超新星遗迹持续向外扩张，冲击波清扫周边空间，重塑局部星际环境。",
+				en: "Supernova remnants expand outward continuously. Shock waves sweep the surrounding space and reshape the local interstellar environment."
+			},
+			"0917": {
+				cn: "秋季星空布局规整，标志性亮星依次升起，是历代观星者熟悉且喜爱的夜空图景。",
+				en: "The autumn starry sky has a regular layout. Iconic bright stars rise one after another, being a familiar and beloved night sky scene for stargazers of all ages."
+			},
+			"0918": {
+				cn: "土卫六云层厚重，大气循环活跃，液态湖泊分布地表，环境在太阳系中独一无二。",
+				en: "Titan has thick clouds and active atmospheric circulation, with liquid lakes distributed on the surface. Its environment is unique in the solar system."
+			},
+			"0919": {
+				cn: "宇宙大尺度结构连绵延展，星系与星系团连成丝状，编织出宏大的宇宙网络。",
+				en: "Large-scale cosmic structures stretch continuously. Galaxies and galaxy clusters connect into filaments, weaving a grand cosmic network."
+			},
+			"0920": {
+				cn: "小型疏散星团恒星数量不多，结构松散，年轻的星辰结伴遨游在银河之中。",
+				en: "Small open star clusters have a small number of stars and loose structures. Young stars travel together in the Milky Way."
+			},
+			"0921": {
+				cn: "星际尘埃吸收可见光，让后方天体隐于暗影之中，为宇宙增添了无穷神秘感。",
+				en: "Interstellar dust absorbs visible light, hiding celestial bodies behind in shadows and adding endless mystery to the universe."
+			},
+			"0922": {
+				cn: "秋分时节昼夜均分，夜空星象平稳柔和，星河静静流淌，氛围安宁祥和。",
+				en: "Day and night are equally divided at the Autumnal Equinox. The night sky is stable and soft, and the star river flows quietly with a peaceful atmosphere."
+			},
+			"0923": {
+				cn: "气态巨行星大气层分层明显，不同成分的云带平行排布，展现出复杂的大气结构。",
+				en: "The atmosphere of gas giants has obvious layers. Cloud bands of different components are arranged in parallel, showing a complex atmospheric structure."
+			},
+			"0924": {
+				cn: "远距红星系因宇宙学红移呈现偏红色调，是人类观测早期宇宙的重要研究对象。",
+				en: "Distant red galaxies appear reddish due to cosmological redshift, being important research objects for humans to observe the early universe."
+			},
+			"0925": {
+				cn: "行星状星云外壳层层散开，中心残留致密星核，是类太阳恒星走完一生的最终模样。",
+				en: "The outer shell of planetary nebulae scatters layer by layer, with a dense stellar core remaining at the center. It is the final appearance of Sun-like stars after their whole life."
+			},
+			"0926": {
+				cn: "近地彗星到访内太阳系，身姿轻盈，彗尾摇曳，成为夜空中转瞬即逝的美丽风景。",
+				en: "Near-Earth comets visit the inner solar system with a light posture and swaying tails, becoming fleeting beautiful scenery in the night sky."
+			},
+			"0927": {
+				cn: "银河边缘天体分布稀疏，星际物质稀薄，逐步过渡到漆黑的宇宙虚空。",
+				en: "Celestial bodies are sparsely distributed at the edge of the Milky Way with thin interstellar matter, gradually transitioning to the dark cosmic void."
+			},
+			"0928": {
+				cn: "太阳宁静期活动平缓，黑子与耀斑大幅减少，恒星表面呈现出安稳平和的状态。",
+				en: "Solar activities are gentle during the solar quiet period. Sunspots and flares decrease greatly, and the stellar surface presents a stable and peaceful state."
+			},
+			"0929": {
+				cn: "冰天体表面反射冷色光芒，常年处于极寒区域，保留着太阳系原始物质形态。",
+				en: "The surface of icy celestial bodies reflects cold light. They stay in extremely cold areas all year round, retaining the original material form of the solar system."
+			},
+			"0930": {
+				cn: "相互作用星云在引力与辐射影响下形态多变，每一刻都展现出不同的姿态。",
+				en: "Interacting nebulae change shapes under the influence of gravity and radiation, showing different postures every moment."
+			},
+			"1001": {
+				cn: "十月秋夜天高云淡，星空明朗开阔，星辰错落有致，勾勒出秋日独有的浪漫夜空。",
+				en: "The autumn nights in October are clear and cloudless. The starry sky is bright and open, with stars arranged in good order, outlining the unique romantic night sky of autumn."
+			},
+			"1002": {
+				cn: "经典螺旋星系结构对称完美，旋臂缠绕有序，是宇宙中最具美感的星系形态之一。",
+				en: "Classic spiral galaxies have a symmetrical and perfect structure with orderly winding arms, being one of the most beautiful galaxy forms in the universe."
+			},
+			"1003": {
+				cn: "月球正面月海与高地分界清晰，明暗区域对比鲜明，是人类最熟悉的地外天体样貌。",
+				en: "The boundary between maria and highlands on the near side of the Moon is clear with distinct light and dark areas, being the most familiar appearance of extraterrestrial celestial bodies for humans."
+			},
+			"1004": {
+				cn: "分子云内部低温静谧，气体缓慢聚集，是孕育新一代恒星的天然摇篮。",
+				en: "The interior of molecular clouds is low-temperature and quiet. Gas gathers slowly, being a natural cradle for breeding a new generation of stars."
+			},
+			"1005": {
+				cn: "日珥与日冕相伴出现，等离子体流光溢彩，将太阳外围装点得壮丽非凡。",
+				en: "Solar prominences appear together with the solar corona. The plasma is bright and colorful, decorating the outer part of the Sun magnificently."
+			},
+			"1006": {
+				cn: "星系碰撞融合过程漫长，天体不断重组，在数十亿年时光中完成形态的蜕变。",
+				en: "The process of galaxy collision and merging is long. Celestial bodies reorganize continuously and complete morphological transformation over billions of years."
+			},
+			"1007": {
+				cn: "暗淡矮星系依附大星系运转，体量微小，却是研究星系演化不可或缺的样本。",
+				en: "Faint dwarf galaxies operate attached to large galaxies. Small in size, they are indispensable samples for studying galaxy evolution."
+			},
+			"1008": {
+				cn: "暗星云群连片分布，如同宇宙中的黑色森林，遮挡星光，营造出神秘深邃的氛围。",
+				en: "Groups of dark nebulae are distributed continuously, like black forests in the universe. They block starlight and create a mysterious and profound atmosphere."
+			},
+			"1009": {
+				cn: "海王星表面风暴系统复杂，云层流动方向多变，冰巨行星的大气活动变幻莫测。",
+				en: "The storm system on Neptune's surface is complex, and clouds flow in variable directions. The atmospheric activities of this ice giant are unpredictable."
+			},
+			"1010": {
+				cn: "明亮疏散星团群星闪耀，年轻恒星汇聚一堂，在银河之中格外醒目。",
+				en: "Bright open star clusters are full of shining stars. Young stars gather together, standing out prominently in the Milky Way."
+			},
+			"1011": {
+				cn: "多彩行星状星云层次丰富，气体环带色彩渐变，是恒星晚年留给宇宙的精美艺术品。",
+				en: "Colorful planetary nebulae have rich layers with gradient colors of gas rings, being exquisite artworks left by aging stars to the universe."
+			},
+			"1012": {
+				cn: "极深场影像收录数万遥远星系，人类借此窥见宇宙早期的样貌与演化历程。",
+				en: "Ultra-deep field images record tens of thousands of distant galaxies. Humans use them to glimpse the appearance and evolutionary process of the early universe."
+			},
+			"1013": {
+				cn: "长彗尾彗星划过天际，姿态优美，是星际空间中极具观赏性的移动景观。",
+				en: "Comets with long tails cross the sky with elegant postures, being highly ornamental moving landscapes in interstellar space."
+			},
+			"1014": {
+				cn: "火星远古河床遗迹清晰可见，证明这颗红色星球曾经拥有充沛的液态水资源。",
+				en: "Relics of ancient riverbeds on Mars are clearly visible, proving that the Red Planet once had abundant liquid water resources."
+			},
+			"1015": {
+				cn: "致密中子星引力强大，物理性质极端，是现代天体物理重点研究的奇特天体。",
+				en: "Compact neutron stars have strong gravity and extreme physical properties, being peculiar celestial bodies focused on by modern astrophysics research."
+			},
+			"1016": {
+				cn: "银河核心光芒万丈，恒星密集如云，高能活动此起彼伏，是整片星系的能量心脏。",
+				en: "The core of the Milky Way shines brightly with stars as dense as clouds. High-energy activities happen one after another, being the energy heart of the whole galaxy."
+			},
+			"1017": {
+				cn: "天王星表面云层稀疏，整体色调清冷，侧卧的自转姿态让它独树一帜。",
+				en: "Clouds on Uranus' surface are sparse with an overall cold tone. Its sideways rotation posture makes it unique."
+			},
+			"1018": {
+				cn: "大面积反射星云柔光漫射，整片区域朦胧梦幻，宛如宇宙间铺开的轻纱。",
+				en: "Large-area reflection nebulae diffuse soft light. The whole area is hazy and dreamy, like a light gauze spread out in the universe."
+			},
+			"1019": {
+				cn: "巨型星系团容纳上百个星系，依靠引力牢牢束缚，构成宇宙中庞大的天体聚落。",
+				en: "Giant galaxy clusters hold hundreds of galaxies tightly bound by gravity, forming huge celestial settlements in the universe."
+			},
+			"1020": {
+				cn: "月相渐盈，圆月雏形初现，清辉洒满夜空，为秋夜增添温柔意境。",
+				en: "The lunar phase waxes gradually, and the prototype of the full moon appears. Bright moonlight sprinkles the night sky, adding a gentle artistic conception to autumn nights."
+			},
+			"1021": {
+				cn: "恒星风塑造星云外形，亿万年持续作用，让星云拥有如今独特的轮廓。",
+				en: "Stellar winds shape nebula shapes. Acting continuously for billions of years, they give nebulae their current unique outlines."
+			},
+			"1022": {
+				cn: "近地小行星群成群运行，轨道交错，人类持续监测以守护地球安全。",
+				en: "Groups of near-Earth asteroids operate in clusters with intertwined orbits. Humans monitor them continuously to protect the safety of the Earth."
+			},
+			"1023": {
+				cn: "大型发射星云色彩浓烈，氢元素受激发光，在黑暗太空渲染出大片艳丽色彩。",
+				en: "Large emission nebulae have strong colors. Hydrogen elements are excited to glow, rendering large areas of bright colors in the dark space."
+			},
+			"1024": {
+				cn: "密近双星物质相互交流，引力拉扯让恒星形态扭曲，形成罕见的天体景观。",
+				en: "Materials exchange between close binary stars. Gravitational pull distorts stellar shapes, forming rare celestial landscapes."
+			},
+			"1025": {
+				cn: "土卫六地表地貌丰富，沙丘、湖泊与平原并存，是太阳系最具探索价值的卫星之一。",
+				en: "Titan has rich surface landforms with coexisting dunes, lakes and plains, being one of the most valuable satellites for exploration in the solar system."
+			},
+			"1026": {
+				cn: "超新星爆发释放巨量能量，瞬间照亮整片星域，是宇宙中最为壮烈的天文事件。",
+				en: "Supernova explosions release huge amounts of energy and illuminate the entire star field in an instant, being the most magnificent astronomical events in the universe."
+			},
+			"1027": {
+				cn: "宇宙空洞广袤无垠，少有天体分布，直观体现出宇宙空间的空旷与辽阔。",
+				en: "Cosmic voids are boundless with few celestial bodies distributed, directly reflecting the emptiness and vastness of cosmic space."
+			},
+			"1028": {
+				cn: "行星环系统多层嵌套，冰晶颗粒大小不一，阳光折射下呈现出丰富的光泽变化。",
+				en: "Planetary ring systems are multi-layered and nested with ice particles of different sizes. They show rich luster changes under sunlight refraction."
+			},
+			"1029": {
+				cn: "古老球状星团穿越百亿年时光，恒星依旧平稳运转，是宇宙珍贵的活化石。",
+				en: "Ancient globular clusters have passed through billions of years. Stars still operate steadily, being precious living fossils of the universe."
+			},
+			"1030": {
+				cn: "秋末星空清冷静谧，星河缓缓流淌，星辰静默闪烁，氛围悠远安宁。",
+				en: "The starry sky in late autumn is cold and quiet. The star river flows slowly and stars twinkle silently with a distant and peaceful atmosphere."
+			},
+			"1031": {
+				cn: "星际尘埃与星云交织共生，一暗一明相互映衬，构筑出层次丰富的深空画面。",
+				en: "Interstellar dust and nebulae coexist and intertwine, setting off each other between dark and bright, constructing deep-space pictures with rich layers."
+			},
+			"1101": {
+				cn: "十一月冬意渐浓，夜空澄澈干净，星辰明亮清晰，清冷星光为长夜增添别样美感。",
+				en: "Winter grows stronger in November. The night sky is clear and clean, and stars are bright and distinct. Cold starlight adds unique beauty to the long nights."
+			},
+			"1102": {
+				cn: "大型旋涡星系旋臂舒展，恒星与星云错落分布，动态十足，尽显宇宙的生机。",
+				en: "The spiral arms of large spiral galaxies stretch freely. Stars and nebulae are distributed alternately, full of dynamics and showing the vitality of the universe."
+			},
+			"1103": {
+				cn: "水星近距离影像尽显地表坑洼，无大气保护的星球，完整保留了远古撞击痕迹。",
+				en: "Close-up images of Mercury show the rugged surface. Without atmospheric protection, the planet completely retains traces of ancient impacts."
+			},
+			"1104": {
+				cn: "恒星孕育区云气浓密，物质不断聚集坍缩，新的星辰正在黑暗之中悄然诞生。",
+				en: "The gas in stellar breeding areas is dense. Matter keeps gathering and collapsing, and new stars are born quietly in the darkness."
+			},
+			"1105": {
+				cn: "日全食来临之时，白昼转瞬入夜，日冕环绕太阳，是天文观测中难得一见的奇观。",
+				en: "When a total solar eclipse arrives, day turns into night in an instant. The solar corona surrounds the Sun, a rare wonder in astronomical observation."
+			},
+			"1106": {
+				cn: "这张影像由哈勃空间望远镜拍摄，展示了海王星表面一处巨大的暗色风暴。海王星是太阳系距离太阳最远的行星，表面充斥着高速风暴与蓝色甲烷大气。",
+				en: "This image was captured by the Hubble Space Telescope, showing a huge dark storm on the surface of Neptune. Neptune is the farthest planet from the Sun in the solar system, covered with high-speed storms and blue methane atmosphere."
+			},
+			"1107": {
+				cn: "引力扰动下的星系形态扭曲，星流四散延伸，直观展现宇宙引力强大的塑造能力。",
+				en: "Galaxies are distorted under gravitational disturbance, and stellar streams extend in all directions, directly showing the powerful shaping ability of cosmic gravity."
+			},
+			"1108": {
+				cn: "遥远红矮星体量微小，光芒柔和，寿命漫长，是银河系中数量最多的恒星种类。",
+				en: "Distant red dwarfs are tiny in size with soft light and long lifespans, being the most numerous type of stars in the Milky Way."
+			},
+			"1109": {
+				cn: "暗带星云横亘星野，遮挡后方星光，明暗对比强烈，画面视觉冲击力十足。",
+				en: "Dark band nebulae stretch across the star field and block the starlight behind. The strong light and shade contrast brings great visual impact to the picture."
+			},
+			"1110": {
+				cn: "星系核心黑洞引力滔天，吞噬周遭物质，炽热吸积盘成为宇宙中耀眼的光源。",
+				en: "Black holes at galactic cores have overwhelming gravity and swallow surrounding matter. The hot accretion disk becomes a dazzling light source in the universe."
+			},
+			"1111": {
+				cn: "猎户座星云色彩绚烂，作为距离地球最近的恒星诞生区，常年受到天文爱好者的关注。",
+				en: "The Orion Nebula has gorgeous colors. As the closest star-forming region to the Earth, it has long attracted the attention of astronomy enthusiasts."
+			},
+			"1112": {
+				cn: "木星云带层次分明，巨型风暴长久存续，气态巨行星内部蕴藏着难以估量的能量。",
+				en: "Jupiter's cloud bands have distinct layers, and giant storms exist for a long time. The interior of this gas giant contains immeasurable energy."
+			},
+			"1113": {
+				cn: "年轻疏散星团星光璀璨，同期诞生的恒星结伴而行，在银河中自由遨游。",
+				en: "Young open star clusters are bright with stars. Stars born at the same time travel together and roam freely in the Milky Way."
+			},
+			"1114": {
+				cn: "行星状星云形态柔美，气体圈层向外扩散，是恒星落幕时留给宇宙的美丽礼物。",
+				en: "Planetary nebulae have soft shapes. Gas layers diffuse outward, being beautiful gifts left by stars to the universe when they come to an end."
+			},
+			"1115": {
+				cn: "深空巡天照片收录无数远方星系，每一个光点，都是一段跨越亿万光年的宇宙故事。",
+				en: "Deep-sky survey photos record countless distant galaxies. Every light spot tells a cosmic story across hundreds of millions of light-years."
+			},
+			"1116": {
+				cn: "彗星掠过星空，长长的彗尾随风舒展，在夜幕上划出灵动优美的轨迹。",
+				en: "Comets pass through the starry sky with long tails stretching freely, drawing flexible and beautiful trajectories on the night curtain."
+			},
+			"1117": {
+				cn: "火星地表荒漠广袤，沙丘与岩石遍布，红色星球苍凉的地貌尽显星际旷野之美。",
+				en: "The desert on Mars' surface is vast, covered with dunes and rocks. The desolate landforms of the Red Planet show the beauty of interstellar wilderness."
+			},
+			"1118": {
+				cn: "高速旋转的中子星辐射脉冲信号，如同宇宙灯塔，为深空探测提供精准参照。",
+				en: "High-speed rotating neutron stars radiate pulse signals, like cosmic lighthouses, providing accurate references for deep-space exploration."
+			},
+			"1119": {
+				cn: "银河中心区域物质密集，高能活动频发，是整个星系物质与能量流转的核心。",
+				en: "Matter is dense and high-energy activities occur frequently in the central region of the Milky Way, being the core of matter and energy flow of the whole galaxy."
+			},
+			"1120": {
+				cn: "冰巨行星海王星通体幽蓝，云层飞驰，冰冷外表下暗藏着太阳系最强的风暴。",
+				en: "The ice giant Neptune is dark blue as a whole with fast-moving clouds. The strongest storms in the solar system are hidden under its cold appearance."
+			},
+			"1121": {
+				cn: "反射星云借星光焕发光彩，尘埃散射光线，形成整片朦胧柔和的光之领域。",
+				en: "Reflection nebulae shine by starlight. Dust scatters light, forming a whole hazy and soft field of light."
+			},
+			"1122": {
+				cn: "大型星系团引力束缚众多星系，聚集在同一空域，构筑成宇宙巨型天体系统。",
+				en: "Large galaxy clusters bind numerous galaxies by gravity and gather in the same airspace, forming giant cosmic celestial systems."
+			},
+			"1123": {
+				cn: "月食天象上演，地影笼罩月球，银月转为暗红，夜色之中更添几分神秘。",
+				en: "A lunar eclipse occurs when the Earth's shadow covers the Moon, turning the silver Moon dark red and adding more mystery to the night."
+			},
+			"1124": {
+				cn: "恒星风常年吹拂星际空间，重塑星云形态，缓慢改变着周边宇宙的样貌。",
+				en: "Stellar winds blow in interstellar space all year round, reshaping nebula forms and slowly changing the appearance of the surrounding universe."
+			},
+			"1125": {
+				cn: "近地小行星形态不规则，游走在地球轨道周边，是人类重点监测的星际天体。",
+				en: "Near-Earth asteroids have irregular shapes and travel around Earth's orbit, being interstellar bodies monitored emphatically by humans."
+			},
+			"1126": {
+				cn: "绚丽发射星云被紫外光点亮，氢气渲染出浓烈色彩，在黑暗太空格外醒目。",
+				en: "Gorgeous emission nebulae are lit up by ultraviolet light. Hydrogen gas renders strong colors, standing out prominently in the dark space."
+			},
+			"1127": {
+				cn: "双星系统相依运转，引力相互制衡，亿万年相伴，成为宇宙稳定的恒星组合。",
+				en: "Binary star systems operate dependently with balanced gravity. Accompanying each other for billions of years, they become stable stellar combinations in the universe."
+			},
+			"1128": {
+				cn: "土卫六浓厚大气包裹星球，地表烃类湖泊遍布，独特环境成为天文学家的研究热点。",
+				en: "Titan is wrapped by a thick atmosphere with hydrocarbon lakes all over the surface. Its unique environment has become a research hotspot for astronomers."
+			},
+			"1129": {
+				cn: "超新星爆发冲击波向外扩散，搅动星际介质，将恒星物质播撒向广阔宇宙。",
+				en: "Shock waves from supernova explosions spread outward and stir interstellar medium, spreading stellar matter to the vast universe."
+			},
+			"1130": {
+				cn: "宇宙虚空辽阔苍茫，天体稀少，让人类真切感受到宇宙尺度的浩瀚无垠。",
+				en: "Cosmic voids are vast and boundless with few celestial bodies, making humans truly feel the immensity of the cosmic scale."
+			},
+			"1201": {
+				cn: "十二月寒冬降临，夜空通透如洗，繁星清晰明亮，清冷星光陪伴漫漫冬夜。",
+				en: "Winter arrives in December. The night sky is as clear as washed, and stars are bright and distinct. Cold starlight accompanies the long winter nights."
+			},
+			"1202": {
+				cn: "经典螺旋星系旋臂优美舒展，恒星有序分布，是宇宙演化出的经典天体形态。",
+				en: "Classic spiral galaxies have elegant and stretched spiral arms with stars distributed in order, being classic celestial forms evolved by the universe."
+			},
+			"1203": {
+				cn: "月球表面陨石坑密布，古老伤痕遍布全域，默默记录着太阳系漫长的演变历史。",
+				en: "The Moon's surface is densely covered with craters. Ancient scars spread all over, silently recording the long evolutionary history of the solar system."
+			},
+			"1204": {
+				cn: "星际分子云寒冷静谧，物质持续汇聚，为新一代恒星的诞生积蓄能量与物质。",
+				en: "Interstellar molecular clouds are cold and quiet. Matter converges continuously, accumulating energy and matter for the birth of a new generation of stars."
+			},
+			"1205": {
+				cn: "太阳活动区日珥、耀斑接连出现，等离子体剧烈涌动，展现恒星强大的内在能量。",
+				en: "Prominences and flares appear one after another in solar active regions. Plasma surges violently, showing the powerful internal energy of stars."
+			},
+			"1206": {
+				cn: "相互碰撞的星系扭曲变形，引力拉扯造就奇特样貌，是宇宙演化中壮丽的一幕。",
+				en: "Colliding galaxies are distorted and deformed. Gravitational pull creates peculiar appearances, a magnificent scene in cosmic evolution."
+			},
+			"1207": {
+				cn: "迷你矮星系依附大星系生存，结构简单，是研究星系起源与早期形态的重要样本。",
+				en: "Mini dwarf galaxies survive attached to large galaxies with simple structures, being important samples for studying the origin and early forms of galaxies."
+			},
+			"1208": {
+				cn: "长条暗星云划分星区，黑色云带与亮星群相映，画面层次分明，氛围感十足。",
+				en: "Long dark nebulae divide star regions. Black cloud bands set off bright star groups, with distinct picture layers and strong atmosphere."
+			},
+			"1209": {
+				cn: "星系中心超大质量黑洞引力强劲，吞噬物质形成明亮吸积盘，成为深空醒目标志。",
+				en: "Supermassive black holes at galactic centers have strong gravity. They swallow matter and form bright accretion disks, becoming striking symbols in deep space."
+			},
+			"1210": {
+				cn: "猎户座大星云远近闻名，色彩丰富、结构复杂，是天文观测与科普的经典目标。",
+				en: "The Great Orion Nebula is well-known far and wide with rich colors and complex structures, being a classic target for astronomical observation and popular science."
+			},
+			"1211": {
+				cn: "木星大气风云涌动，彩色云带交错延展，巨型行星的大气活动终年不曾停歇。",
+				en: "Clouds surge in Jupiter's atmosphere, and colorful cloud bands extend alternately. The atmospheric activities of this giant planet never stop all year round."
+			},
+			"1212": {
+				cn: "星团内恒星相伴运转，同源共生，如同宇宙中相亲相爱的星辰大家庭。",
+				en: "Stars in star clusters operate together and coexist from the same source, like a big loving family of stars in the universe."
+			},
+			"1213": {
+				cn: "恒星晚年化作行星状星云，外层气体缓缓飘散，以温柔的方式走完恒星的一生。",
+				en: "Aging stars turn into planetary nebulae. Outer gas drifts away slowly, ending the stellar life in a gentle way."
+			},
+			"1214": {
+				cn: "极深场图像囊括亿万光年外的星系，人类借此不断拓展对宇宙边界的认知。",
+				en: "Ultra-deep field images include galaxies billions of light-years away. Humans continuously expand their cognition of the cosmic boundary with them."
+			},
+			"1215": {
+				cn: "长尾彗星巡游星际，冰体升华形成飘逸彗尾，在冬日夜空留下优美轨迹。",
+				en: "Long-tailed comets cruise through interstellar space. Ice sublimates to form elegant tails, leaving beautiful trajectories in the winter night sky."
+			},
+			"1216": {
+				cn: "火星地貌苍凉雄浑，峡谷、沙丘与岩石交错，尽显红色星球独有的荒野气质。",
+				en: "Mars' landforms are desolate and grand. Canyons, dunes and rocks intertwine, showing the unique wild temperament of the Red Planet."
+			},
+			"1217": {
+				cn: "脉冲星规律发射电磁信号，精准如同宇宙时钟，为天文观测提供重要校准依据。",
+				en: "Pulsars emit electromagnetic signals regularly, as accurate as cosmic clocks, providing important calibration basis for astronomical observation."
+			},
+			"1218": {
+				cn: "银河核心璀璨夺目，恒星密布、星云翻腾，是整片银河系活力最旺盛的区域。",
+				en: "The core of the Milky Way is dazzling with dense stars and rolling nebulae, being the most vibrant area of the whole Milky Way."
+			},
+			"1219": {
+				cn: "冰巨行星天王星姿态独特，侧向自转，淡青色外表下藏着寒冷而狂暴的大气。",
+				en: "The ice giant Uranus has a unique posture with lateral rotation. Cold and violent atmosphere is hidden under its pale cyan appearance."
+			},
+			"1220": {
+				cn: "反射星云借星光幻化光影，朦胧柔和，将幽暗的星际空间装点得如梦似幻。",
+				en: "Reflection nebulae transform light and shadow by starlight, hazy and soft, decorating the dark interstellar space dreamily."
+			},
+			"1221": {
+				cn: "庞大星系团由数百个星系组成，引力紧密联结，构成宇宙尺度下的巨型天体集团。",
+				en: "Huge galaxy clusters are composed of hundreds of galaxies closely connected by gravity, forming giant celestial groups on a cosmic scale."
+			},
+			"1222": {
+				cn: "满月高悬冬夜，清辉遍洒大地，圆月静谧温柔，为寒冬夜色增添融融暖意。",
+				en: "The full moon hangs high on winter nights, and bright moonlight sprinkles over the earth. The full moon is quiet and gentle, adding warmth to the cold winter night."
+			},
+			"1223": {
+				cn: "星际风穿梭星云之间，经年累月雕琢星云形态，造就如今千姿百态的宇宙景观。",
+				en: "Stellar winds travel between nebulae and carve nebula shapes for years, creating varied cosmic landscapes today."
+			},
+			"1224": {
+				cn: "近地小行星在太阳系内侧运行，形态各异，是人类长期监测的重点星际天体。",
+				en: "Near-Earth asteroids operate inside the solar system with various shapes, being key interstellar bodies monitored by humans for a long time."
+			},
+			"1225": {
+				cn: "发射星云被高能射线点亮，大面积彩光弥漫太空，是宇宙中热烈绚烂的景致。",
+				en: "Emission nebulae are lit up by high-energy rays. Large areas of colored light fill the space, being warm and gorgeous scenery in the universe."
+			},
+			"1226": {
+				cn: "双星系统彼此环绕、共生演化，引力相伴亿万年，书写宇宙里浪漫的星辰故事。",
+				en: "Binary star systems orbit and evolve symbiotically. Accompanied by gravity for billions of years, they write romantic star stories in the universe."
+			},
+			"1227": {
+				cn: "土卫六神秘而独特，浓厚大气与液态湖泊并存，一直是深空探测的热门目标。",
+				en: "Titan is mysterious and unique with coexisting thick atmosphere and liquid lakes, always being a popular target for deep-space exploration."
+			},
+			"1228": {
+				cn: "超新星遗迹不断向外扩张，恒星爆发的余波久久不散，记录着壮烈的恒星终章。",
+				en: "Supernova remnants expand outward continuously. The aftershocks of stellar explosions linger for a long time, recording the magnificent final chapter of stars."
+			},
+			"1229": {
+				cn: "宇宙空洞空旷寂寥，天体稀疏，直观展现出宇宙绝大部分空间都是无尽虚空。",
+				en: "Cosmic voids are empty and desolate with sparse celestial bodies, directly showing that most of the cosmic space is endless void."
+			},
+			"1230": {
+				cn: "土星光环唯美梦幻，冰晶环带环绕行星，在冬日星光下更显晶莹剔透。",
+				en: "Saturn's rings are beautiful and dreamy. Ice rings surround the planet, looking more crystal and transparent under winter starlight."
+			},
+			"1231": {
+				cn: "年末星空宁静悠远，漫天星辰静静闪烁，一年的星河美景在此圆满收官。",
+				en: "The starry sky at the end of the year is quiet and distant. Countless stars twinkle silently, and the beautiful star river scenery of the whole year comes to a perfect end here."
+			}
+        };
+        function searchStarImage() {
+            let m = document.getElementById("month").value;
+            let d = document.getElementById("day").value;
+            let month = m.padStart(2, '0');
+            let day = d.padStart(2, '0');
+            let dateCode = month + day;
+            let img = document.getElementById("starImage");
+            let tip = document.getElementById("imgTip");
+            let cnDom = document.getElementById("cnText");
+            let enDom = document.getElementById("enText");
+            if (starData[dateCode]) {
+                img.src = `img/${dateCode}.jpg`;
+                tip.innerText = `查询日期：${month}月${day}日 | NASA 专属星空图`;
+                cnDom.innerText = starData[dateCode].cn;
+                enDom.innerText = starData[dateCode].en;
+            } else {
+                img.src = "img/default.jpg";
+                tip.innerText = `暂未收录 ${month}月${day}日 的星空影像`;
+                cnDom.innerText = "暂无该日期对应的星空介绍内容。";
+                enDom.innerText = "No introduction content for this date yet.";
+            }
+        }
+    </script>
+</body>
+</html>

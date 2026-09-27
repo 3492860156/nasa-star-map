@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA 生日星空图 | NASA Birthday Star Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background-color: #0b132b;
+            color: #f0f8ff;
+            padding: 40px 20px;
+            line-height: 1.8;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #1c2541;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(100, 180, 255, 0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #5bc0be;
+        }
+        .intro {margin-bottom: 30px;}
+        .cn-text, .en-text {
+            margin: 15px 0;
+            font-size: 16px;
+        }
+        .en-text {color: #d0e8f8;}
+        .btn-box {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background-color: #3a506b;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        .btn:hover {background-color: #5bc0be;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NASA 生日星空图 / NASA Birthday Star Map</h1>
+        <div class="intro">
+            <div class="cn-text">
+                <strong>中文介绍：</strong><br>
+                NASA 生日星空图是美国航空航天局推出的趣味天文工具。你可以输入自己的出生日期，查询在你出生当天，哈勃望远镜拍摄到的宇宙星空影像。每一个日期都对应一张独一无二的星空照片，带你看见出生那天头顶的浩瀚星河。
+            </div>
+            <div class="en-text">
+                <strong>English Introduction：</strong><br>
+                NASA Birthday Star Map is an interesting astronomy tool launched by NASA. Enter your birth date, and you can view the cosmic starry sky image captured by the Hubble Telescope on the day you were born. Each date matches a unique photo of the universe, letting you explore the magnificent starry sky above on your birthday.
+            </div>
+        </div>
+        <div class="btn-box">
+            <a href="NASAhostresult.html" class="btn">通过NASA官网进行查询(最新版)</a>
+            <a href="NASAresult.html" class="btn">从本机查询(老版)</a>
+        </div>
+    </div>
+</body>
+</html>
